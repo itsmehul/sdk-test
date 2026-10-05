@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import httpx
 import pytest
-from rightpeople._streaming import iter_events
 from pydantic import BaseModel
+from rightpeople._streaming import iter_events
 
 from rightpeople import APIError, ServerSentEvent, Stream
 

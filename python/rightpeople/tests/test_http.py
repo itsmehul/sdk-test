@@ -4,18 +4,18 @@ from collections.abc import Callable
 from typing import Any
 
 import httpx
-import rightpeople._client
 import pytest
+import rightpeople._client
 
 from rightpeople import (
     APIConnectionError,
     APITimeoutError,
     AsyncRightPeople,
     BadRequestError,
-    RightPeople,
-    RightPeopleError,
     InternalServerError,
     RateLimitError,
+    RightPeople,
+    RightPeopleError,
 )
 
 MODELS: dict[str, Any] = {"object": "list", "data": []}

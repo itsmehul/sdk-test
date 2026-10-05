@@ -52,7 +52,8 @@ class _BaseClient:
         resolved_key = api_key or os.environ.get("RIGHTPEOPLE_API_KEY")
         if not resolved_key:
             raise RightPeopleError(
-                "Missing API key. Pass `api_key` or set the RIGHTPEOPLE_API_KEY environment variable."
+                "Missing API key. Pass `api_key` or set the "
+                "RIGHTPEOPLE_API_KEY environment variable."
             )
         self.api_key = resolved_key
         self.base_url = (

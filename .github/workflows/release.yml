@@ -24,7 +24,7 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: "@itsmehul"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec turbo run build test lint:pkg lint:types
+      - run: pnpm exec turbo run build test lint:pkg lint:types --filter "./packages/*"
       - name: Open release PR or publish to npm
         uses: changesets/action@v1
         with:

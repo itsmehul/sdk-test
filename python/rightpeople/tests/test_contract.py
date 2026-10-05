@@ -9,8 +9,8 @@ from rightpeople import (
     AsyncRightPeople,
     AuthenticationError,
     BadRequestError,
-    RightPeople,
     NotFoundError,
+    RightPeople,
 )
 
 
