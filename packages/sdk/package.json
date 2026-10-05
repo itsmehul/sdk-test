@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/itsmehul/rightpeople-sdk.git",
+    "url": "git+https://github.com/itsmehul/sdk-test.git",
     "directory": "packages/sdk"
   },
   "type": "module",
