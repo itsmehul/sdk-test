@@ -4,6 +4,7 @@ import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
+import { UpstreamError } from "./engine";
 import { apiError } from "./errors";
 import { chat } from "./routes/chat";
 import { embeddings } from "./routes/embeddings";
@@ -62,6 +63,9 @@ export function createApp(options: { apiKey?: string } = {}) {
   app.notFound((c) => apiError(c, 404, `Route ${c.req.method} ${c.req.path} not found`));
   app.onError((err, c) => {
     if (err instanceof HTTPException) return err.getResponse();
+    if (err instanceof UpstreamError) {
+      return apiError(c, 502, err.message, { code: "upstream_error" });
+    }
     console.error(err);
     return apiError(c, 500, "Internal server error");
   });

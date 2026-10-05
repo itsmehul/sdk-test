@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { streamSSE } from "hono/streaming";
-import { complete, tokenize } from "../engine";
+import { complete, streamComplete } from "../engine";
 import {
   ChatCompletion,
   ChatCompletionChunk,
@@ -39,18 +39,19 @@ const createChatCompletion = createRoute({
   },
 });
 
+const toUsage = (promptTokens: number, completionTokens: number) => ({
+  prompt_tokens: promptTokens,
+  completion_tokens: completionTokens,
+  total_tokens: promptTokens + completionTokens,
+});
+
 export const chat = new OpenAPIHono().openapi(createChatCompletion, async (c) => {
   const body = c.req.valid("json");
-  const result = complete(body);
   const id = `chatcmpl-${crypto.randomUUID()}`;
   const created = Math.floor(Date.now() / 1000);
-  const usage = {
-    prompt_tokens: result.promptTokens,
-    completion_tokens: result.completionTokens,
-    total_tokens: result.promptTokens + result.completionTokens,
-  };
 
   if (!body.stream) {
+    const result = await complete(body);
     return c.json(
       {
         id,
@@ -61,34 +62,50 @@ export const chat = new OpenAPIHono().openapi(createChatCompletion, async (c) =>
           {
             index: 0,
             message: { role: "assistant" as const, content: result.content },
-            finish_reason: "stop" as const,
+            finish_reason: result.finishReason,
           },
         ],
-        usage,
+        usage: toUsage(result.promptTokens, result.completionTokens),
       },
       200,
     );
   }
 
+  const abort = new AbortController();
+  const deltas = streamComplete(body, abort.signal);
+  // Pull the first delta before opening the stream so Ollama failures surface as JSON errors.
+  const first = await deltas.next();
+
   const base = { id, object: "chat.completion.chunk" as const, created, model: body.model };
   return streamSSE(c, async (stream) => {
+    stream.onAbort(() => abort.abort());
     const send = (chunk: ChatCompletionChunk) => stream.writeSSE({ data: JSON.stringify(chunk) });
 
     await send({
       ...base,
       choices: [{ index: 0, delta: { role: "assistant", content: "" }, finish_reason: null }],
     });
-    for (const token of tokenize(result.content)) {
-      if (stream.aborted) return;
-      await send({
-        ...base,
-        choices: [{ index: 0, delta: { content: token }, finish_reason: null }],
-      });
+
+    let next = first;
+    while (!next.done && !stream.aborted) {
+      const delta = next.value;
+      if (delta.type === "content") {
+        await send({
+          ...base,
+          choices: [{ index: 0, delta: { content: delta.content }, finish_reason: null }],
+        });
+      } else {
+        await send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: delta.finishReason }] });
+        if (body.stream_options?.include_usage) {
+          await send({
+            ...base,
+            choices: [],
+            usage: toUsage(delta.promptTokens, delta.completionTokens),
+          });
+        }
+      }
+      next = await deltas.next();
     }
-    await send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] });
-    if (body.stream_options?.include_usage) {
-      await send({ ...base, choices: [], usage });
-    }
-    await stream.writeSSE({ data: "[DONE]" });
+    if (!stream.aborted) await stream.writeSSE({ data: "[DONE]" });
   });
 });

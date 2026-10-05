@@ -8,25 +8,25 @@ from pydantic import SecretStr
 
 @pytest.fixture
 def chat(base_url: str, api_key: str) -> ChatInterfaze:
-    return ChatInterfaze(api_key=SecretStr(api_key), base_url=base_url)
+    return ChatInterfaze(api_key=SecretStr(api_key), base_url=base_url, max_completion_tokens=16)
 
 
 def test_invoke(chat: ChatInterfaze) -> None:
-    reply = chat.invoke("hi langchain")
+    reply = chat.invoke("Say hello.")
     assert isinstance(reply, AIMessage)
-    assert reply.content == "Echo: hi langchain"
+    assert reply.content
     assert reply.usage_metadata is not None
-    assert reply.usage_metadata["output_tokens"] == 3
+    assert reply.usage_metadata["output_tokens"] > 0
 
 
 def test_stream(chat: ChatInterfaze) -> None:
-    text = "".join(str(chunk.content) for chunk in chat.stream("token by token"))
-    assert text == "Echo: token by token"
+    text = "".join(str(chunk.content) for chunk in chat.stream("Count to three."))
+    assert text
 
 
 async def test_ainvoke(chat: ChatInterfaze) -> None:
-    reply = await chat.ainvoke("async langchain")
-    assert reply.content == "Echo: async langchain"
+    reply = await chat.ainvoke("Say hi.")
+    assert reply.content
 
 
 def test_identity(chat: ChatInterfaze) -> None:
@@ -38,7 +38,7 @@ def test_identity(chat: ChatInterfaze) -> None:
 def test_reads_env(monkeypatch: pytest.MonkeyPatch, base_url: str, api_key: str) -> None:
     monkeypatch.setenv("INTERFAZE_API_KEY", api_key)
     monkeypatch.setenv("INTERFAZE_BASE_URL", base_url)
-    assert ChatInterfaze().invoke("from env").content == "Echo: from env"
+    assert ChatInterfaze(max_completion_tokens=8).invoke("Say hi.").content
 
 
 def test_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -52,4 +52,4 @@ def test_embeddings(base_url: str, api_key: str) -> None:
     docs = embeddings.embed_documents(["a", "b", "c"])
     assert len(docs) == 3
     assert len(docs[0]) == 16
-    assert embeddings.embed_query("a") == pytest.approx(docs[0])
+    assert embeddings.embed_query("a") == pytest.approx(docs[0], abs=1e-4)

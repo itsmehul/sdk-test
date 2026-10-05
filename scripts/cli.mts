@@ -7,11 +7,21 @@ import pc from "picocolors";
 type Task = { label: string; hint: string; command: string; args: string[] };
 
 const example = (file: string): string[] => ["--env-file-if-exists=.env", `examples/src/${file}`];
+const uv = (...args: string[]): string[] => ["run", "--directory", "python", ...args];
+const pyExample = (file: string): string[] => [
+  "run",
+  "--project",
+  "python",
+  "--env-file",
+  ".env",
+  "python",
+  `examples/python/${file}`,
+];
 
 const tasks = {
   codegen: {
     label: "Generate spec and SDK types",
-    hint: "apps/api → openapi/openapi.json → packages/sdk/src/generated",
+    hint: "apps/api → openapi/openapi.json → TS types + Python models",
     command: "turbo",
     args: ["run", "generate"],
   },
@@ -69,6 +79,54 @@ const tasks = {
     command: "tsx",
     args: example("langchain.ts"),
   },
+  exampleSdkPy: {
+    label: "interfaze (Python)",
+    hint: "Needs `pnpm dev` running",
+    command: "uv",
+    args: pyExample("sdk.py"),
+  },
+  exampleLangchainPy: {
+    label: "langchain-interfaze (Python)",
+    hint: "Needs `pnpm dev` running",
+    command: "uv",
+    args: pyExample("langchain.py"),
+  },
+  pySync: {
+    label: "Install Python deps",
+    hint: "uv sync",
+    command: "uv",
+    args: ["sync", "--directory", "python"],
+  },
+  pyTest: {
+    label: "Test",
+    hint: "pytest against the reference API",
+    command: "uv",
+    args: uv("pytest"),
+  },
+  pyTypecheck: {
+    label: "Typecheck",
+    hint: "pyright strict",
+    command: "uv",
+    args: uv("pyright"),
+  },
+  pyLint: {
+    label: "Lint",
+    hint: "ruff check",
+    command: "uv",
+    args: uv("ruff", "check", "."),
+  },
+  pyFormat: {
+    label: "Format",
+    hint: "ruff format",
+    command: "uv",
+    args: uv("ruff", "format", "."),
+  },
+  pyBuild: {
+    label: "Build wheels",
+    hint: "uv build → python/dist",
+    command: "uv",
+    args: ["build", "--directory", "python", "--all-packages", "--out-dir", "dist"],
+  },
   changeset: {
     label: "Add changeset",
     hint: "Describe a change for the next release",
@@ -101,7 +159,18 @@ const groups: ReadonlyArray<{ label: string; hint: string; tasks: readonly TaskI
   {
     label: "Examples",
     hint: "Call the local API through each package",
-    tasks: ["exampleSdk", "exampleAiSdk", "exampleLangchain"],
+    tasks: [
+      "exampleSdk",
+      "exampleAiSdk",
+      "exampleLangchain",
+      "exampleSdkPy",
+      "exampleLangchainPy",
+    ],
+  },
+  {
+    label: "Python",
+    hint: "uv workspace in python/",
+    tasks: ["pySync", "pyTest", "pyTypecheck", "pyLint", "pyFormat", "pyBuild"],
   },
   { label: "Release", hint: "Changesets", tasks: ["changeset", "changesetStatus", "version"] },
 ];
@@ -122,6 +191,12 @@ check("INTERFAZE_API_KEY", Boolean(process.env.INTERFAZE_API_KEY), "not set");
 check("OpenAPI spec", existsSync("openapi/openapi.json"), "missing (run codegen)");
 check("SDK types", existsSync("packages/sdk/src/generated/schema.d.ts"), "missing (run codegen)");
 check("Build output", existsSync("packages/sdk/dist/index.mjs"), "missing (run build)");
+check(
+  "Python models",
+  existsSync("python/interfaze/src/interfaze/_generated/models.py"),
+  "missing (run codegen)",
+);
+check("Python venv", existsSync("python/.venv"), "missing (Python → Install Python deps)");
 
 const groupIndex = await select({
   message: "Group",

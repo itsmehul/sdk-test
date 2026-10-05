@@ -27,10 +27,40 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
       - run: pnpm install --frozen-lockfile
+      - run: uv sync --directory python --locked
       - run: pnpm exec biome ci .
-      - name: OpenAPI spec and SDK types are up to date
+      - run: uv run --directory python ruff check .
+      - run: uv run --directory python ruff format --check .
+      - name: OpenAPI spec and generated types are up to date
         run: |
           pnpm exec turbo run generate
-          git diff --exit-code -- openapi packages/sdk/src/generated
+          git diff --exit-code -- openapi packages/sdk/src/generated python/interfaze/src/interfaze/_generated
       - run: pnpm exec turbo run build typecheck test lint:pkg lint:types
+
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --directory python --locked
+      - run: uv run --directory python pyright
+      - run: uv run --directory python pytest

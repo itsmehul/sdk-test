@@ -52,25 +52,33 @@ def test_validation_error(client: Interfaze) -> None:
 def test_chat_completion(client: Interfaze) -> None:
     completion = client.chat.completions.create(
         model="interfaze-beta",
-        messages=[{"role": "user", "content": "hello python"}],
-        temperature=0.2,
+        messages=[{"role": "user", "content": "Say hello."}],
+        temperature=0,
+        max_tokens=16,
     )
-    assert completion.choices[0].message.content == "Echo: hello python"
-    assert completion.usage.total_tokens > 0
+    choice = completion.choices[0]
+    assert choice.message.role == "assistant"
+    assert choice.message.content
+    assert choice.finish_reason in ("stop", "length")
+    assert completion.usage.completion_tokens > 0
 
 
 def test_chat_stream(client: Interfaze) -> None:
     with client.chat.completions.create(
         model="interfaze-beta",
-        messages=[{"role": "user", "content": "stream me please"}],
+        messages=[{"role": "user", "content": "Count to three."}],
         stream=True,
         stream_options={"include_usage": True},
+        max_tokens=16,
     ) as stream:
         chunks = list(stream)
+    assert chunks[0].choices[0].delta.role == "assistant"
     text = "".join(c.choices[0].delta.content or "" for c in chunks if c.choices)
-    assert text == "Echo: stream me please"
+    assert text
+    finish = [c.choices[0].finish_reason for c in chunks if c.choices]
+    assert finish[-1] in ("stop", "length")
     assert chunks[-1].usage is not None
-    assert chunks[-1].usage.completion_tokens == 4
+    assert chunks[-1].usage.completion_tokens > 0
 
 
 def test_embeddings(client: Interfaze) -> None:
@@ -88,25 +96,28 @@ def test_embeddings_base64(client: Interfaze) -> None:
     raw = encoded.data[0].embedding
     assert isinstance(raw, str)
     decoded = struct.unpack("<4f", base64.b64decode(raw))
-    assert decoded == pytest.approx(floats.data[0].embedding, abs=1e-6)
+    assert decoded == pytest.approx(floats.data[0].embedding, abs=1e-4)
 
 
 async def test_async_chat(async_client: AsyncInterfaze) -> None:
     async with async_client:
         completion = await async_client.chat.completions.create(
-            model="interfaze-beta", messages=[{"role": "user", "content": "async hi"}]
+            model="interfaze-beta",
+            messages=[{"role": "user", "content": "Say hi."}],
+            max_tokens=16,
         )
-        assert completion.choices[0].message.content == "Echo: async hi"
+        assert completion.choices[0].message.content
 
         stream = await async_client.chat.completions.create(
             model="interfaze-beta",
-            messages=[{"role": "user", "content": "async stream"}],
+            messages=[{"role": "user", "content": "Say hi."}],
             stream=True,
+            max_tokens=16,
         )
         text = ""
         async for chunk in stream:
             text += chunk.choices[0].delta.content or "" if chunk.choices else ""
-        assert text == "Echo: async stream"
+        assert text
 
         models = await async_client.models.list()
         assert models.data

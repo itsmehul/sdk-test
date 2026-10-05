@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { countTokens, embed, toBase64 } from "../engine";
+import { embed, toBase64 } from "../engine";
 import { EmbeddingRequest, EmbeddingResponse, ErrorResponse } from "../schemas";
 
 const createEmbedding = createRoute({
@@ -24,23 +24,20 @@ const createEmbedding = createRoute({
   },
 });
 
-export const embeddings = new OpenAPIHono().openapi(createEmbedding, (c) => {
+export const embeddings = new OpenAPIHono().openapi(createEmbedding, async (c) => {
   const body = c.req.valid("json");
   const inputs = typeof body.input === "string" ? [body.input] : body.input;
-  const tokens = inputs.reduce((sum, text) => sum + countTokens(text), 0);
+  const { embeddings, promptTokens } = await embed(inputs, body.dimensions);
   return c.json(
     {
       object: "list" as const,
       model: body.model,
-      data: inputs.map((text, index) => ({
+      data: embeddings.map((vector, index) => ({
         object: "embedding" as const,
         index,
-        embedding:
-          body.encoding_format === "base64"
-            ? toBase64(embed(text, body.dimensions))
-            : embed(text, body.dimensions),
+        embedding: body.encoding_format === "base64" ? toBase64(vector) : vector,
       })),
-      usage: { prompt_tokens: tokens, total_tokens: tokens },
+      usage: { prompt_tokens: promptTokens, total_tokens: promptTokens },
     },
     200,
   );
