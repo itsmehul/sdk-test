@@ -4,9 +4,9 @@ import {
   APIConnectionTimeoutError,
   APIUserAbortError,
   BadRequestError,
+  RateLimitError,
   RightPeople,
   RightPeopleError,
-  RateLimitError,
 } from "../src";
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
@@ -66,7 +66,11 @@ describe("http core", () => {
     expect(requests).toHaveLength(3);
     const keys = new Set(requests.map((r) => r.headers.get("idempotency-key")));
     expect(keys.size).toBe(1);
-    expect(requests.map((r) => r.headers.get("x-rightpeople-retry-count"))).toEqual(["0", "1", "2"]);
+    expect(requests.map((r) => r.headers.get("x-rightpeople-retry-count"))).toEqual([
+      "0",
+      "1",
+      "2",
+    ]);
   });
 
   it("gives up after maxRetries and throws a typed error", async () => {

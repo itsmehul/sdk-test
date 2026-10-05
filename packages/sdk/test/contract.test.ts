@@ -1,6 +1,6 @@
 import { createApp, echoEngine } from "@rightpeople/api";
 import { describe, expect, it } from "vitest";
-import { AuthenticationError, BadRequestError, RightPeople, NotFoundError } from "../src";
+import { AuthenticationError, BadRequestError, NotFoundError, RightPeople } from "../src";
 
 const app = createApp({ apiKey: "test-key", engine: echoEngine });
 const client = new RightPeople({

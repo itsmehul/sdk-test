@@ -7,7 +7,10 @@ const { text, usage } = await generateText({
 });
 console.log("generateText:", text, usage);
 
-const result = streamText({ model: rightpeople("rightpeople-beta"), prompt: "Streaming via AI SDK" });
+const result = streamText({
+  model: rightpeople("rightpeople-beta"),
+  prompt: "Streaming via AI SDK",
+});
 process.stdout.write("streamText: ");
 for await (const delta of result.textStream) process.stdout.write(delta);
 process.stdout.write("\n");

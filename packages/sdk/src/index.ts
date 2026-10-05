@@ -7,11 +7,11 @@ export {
   AuthenticationError,
   BadRequestError,
   ConflictError,
-  RightPeopleError,
   InternalServerError,
   NotFoundError,
   PermissionDeniedError,
   RateLimitError,
+  RightPeopleError,
   UnprocessableEntityError,
 } from "./core/errors";
 export {
