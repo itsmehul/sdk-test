@@ -98,14 +98,17 @@ The spec and generated SDK types are checked into the repo, and CI fails if they
 flowchart LR
   client[SDK client] -->|Bearer key| url[Lambda function URL]
   url --> lambda[API Lambda]
-  lambda -->|wake on demand| asg[GPU Auto Scaling group]
-  asg --> gpu[Spot GPU instance running vLLM]
+  lambda -->|wake on demand| asg[Inference Auto Scaling group]
+  asg --> gpu[Spot instance running Ollama or vLLM]
   gpu -->|weights cache| s3[(S3 models bucket)]
 ```
 
 - **API:** `apps/api` bundled to `apps/api/dist/lambda/index.mjs` and deployed as a Node 22 arm64 Lambda behind a streaming function URL. API keys are stored in SSM Parameter Store.
-- **Inference:** an Auto Scaling group (minimum 0, maximum 1) of spot `g4dn.xlarge` instances running vLLM. Chat is served on port 8000 and embeddings on port 8001. Model weights are cached in S3 after the first boot.
-- **Scale to zero:** when no GPU instance is running, the API raises the group to one and returns `503 model_loading` with a `retry-after` header until vLLM is healthy. The instance terminates itself after `idle_minutes` (default 15) without requests. The first request after an idle period therefore takes several minutes.
+- **Inference:** an Auto Scaling group (minimum 0, maximum 1) of spot instances. `inference_backend` picks the hardware:
+  - `cpu` (default): Graviton `c7g.xlarge` running Ollama with the same models as local development, both on port 11434. Uses the standard EC2 vCPU quota.
+  - `gpu`: `g4dn.xlarge` running vLLM, chat on port 8000 and embeddings on port 8001. Needs the "All G and VT Spot Instance Requests" quota (4 vCPUs or more), which is 0 on new accounts.
+  Model weights are cached in S3 after the first boot.
+- **Scale to zero:** when no instance is running, the API raises the group to one and returns `503 model_loading` with a `retry-after` header until the models are ready. The instance terminates itself after `idle_minutes` (default 15) without requests. The first request after an idle period therefore takes several minutes.
 
 ### First deploy
 
@@ -143,19 +146,23 @@ Override these in `infra/terraform/envs/prod` with a `terraform.tfvars` file or 
 | --- | --- |
 | `region` | `us-east-1` |
 | `az_count` | `2` (more zones give a wider pool of spot capacity) |
+| `inference_backend` | `cpu` (`gpu` once G-family quota is approved) |
+| `cpu_instance_types` | `["c7g.xlarge", "c6g.xlarge", "m7g.xlarge"]` |
+| `ollama_chat_model` | `qwen2.5:1.5b` |
+| `ollama_embed_model` | `nomic-embed-text:v1.5` |
 | `gpu_instance_types` | `["g4dn.xlarge"]` (`g6.xlarge` is a good fallback) |
 | `use_spot` | `true` |
 | `vllm_version` | `0.10.2` |
-| `chat_model` | `Qwen/Qwen2.5-1.5B-Instruct` |
+| `chat_model` | `Qwen/Qwen2.5-1.5B-Instruct` (gpu) |
 | `chat_max_model_len` | `4096` |
-| `embed_model` | `nomic-ai/nomic-embed-text-v1.5` |
+| `embed_model` | `nomic-ai/nomic-embed-text-v1.5` (gpu) |
 | `idle_minutes` | `15` |
 
 ### Troubleshooting
 
 - Lambda logs are in the CloudWatch log group `/aws/lambda/rightpeople-api`.
-- GPU boot logs are at `/var/log/rightpeople-boot.log` on the instance. Connect with SSM Session Manager; no SSH key is configured.
-- vLLM runs as the systemd units `vllm-chat` and `vllm-embed`.
+- Inference boot logs are at `/var/log/rightpeople-boot.log` on the instance. Connect with SSM Session Manager; no SSH key is configured.
+- Ollama runs as the systemd unit `ollama`; vLLM runs as `vllm-chat` and `vllm-embed`.
 
 ## Releasing
 

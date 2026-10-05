@@ -25,6 +25,7 @@ const [apiKey, inferenceApiKey] = await Promise.all([
 const gpu = gpuResolver({
   asgName: env("GPU_ASG_NAME"),
   ports: { chat: Number(env("CHAT_PORT")), embed: Number(env("EMBED_PORT")) },
+  healthPath: env("INFERENCE_HEALTH_PATH"),
 });
 
 const app = createApp({

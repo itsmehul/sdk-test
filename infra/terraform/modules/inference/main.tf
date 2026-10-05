@@ -1,8 +1,20 @@
 data "aws_region" "current" {}
 
-# AWS Deep Learning Base AMI: NVIDIA driver, CUDA and AWS CLI preinstalled.
+locals {
+  # gpu: AWS Deep Learning Base AMI with NVIDIA driver, CUDA and AWS CLI preinstalled.
+  # cpu: stock Ubuntu for Graviton. Both mount the root volume at /dev/sda1.
+  ami_parameter = {
+    gpu = "/aws/service/deeplearning/ami/x86_64/base-oss-nvidia-driver-gpu-ubuntu-22.04/latest/ami-id"
+    cpu = "/aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id"
+  }
+  user_data_template = {
+    gpu = "user-data.sh.tftpl"
+    cpu = "user-data-ollama.sh.tftpl"
+  }
+}
+
 data "aws_ssm_parameter" "ami" {
-  name = "/aws/service/deeplearning/ami/x86_64/base-oss-nvidia-driver-gpu-ubuntu-22.04/latest/ami-id"
+  name = local.ami_parameter[var.backend]
 }
 
 resource "aws_s3_bucket" "models" {
@@ -94,7 +106,7 @@ resource "aws_launch_template" "gpu" {
     }
   }
 
-  user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
+  user_data = base64encode(templatefile("${path.module}/${local.user_data_template[var.backend]}", {
     region                      = data.aws_region.current.region
     asg_name                    = "${var.name}-gpu"
     bucket                      = aws_s3_bucket.models.bucket

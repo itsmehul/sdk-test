@@ -1,19 +1,73 @@
+# Node
 node_modules
 dist
 .turbo
 coverage
 *.tgz
+*.tsbuildinfo
+.pnpm-store
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
 .env
 .env.*
 !.env.example
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Editors
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# Logs
+*.log
+logs
+
+# Python
 .venv
+venv
 __pycache__
+*.py[cod]
+*.egg-info
+.eggs
+build
 .pytest_cache
 .ruff_cache
+.mypy_cache
+.coverage
+.coverage.*
+htmlcov
+.tox
+
+# Terraform
 .terraform
 .build
 *.tfstate
 *.tfstate.*
 *.tfvars
+*.tfvars.json
+!*.tfvars.example
+tfplan
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 backend.hcl
+
+# Secrets
+*.pem
+*.key

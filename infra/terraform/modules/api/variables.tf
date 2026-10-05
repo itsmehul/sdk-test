@@ -50,3 +50,7 @@ variable "embed_model" {
 variable "embed_port" {
   type = number
 }
+
+variable "inference_health_path" {
+  type = string
+}

@@ -76,6 +76,7 @@ resource "aws_lambda_function" "api" {
       CHAT_PORT                   = tostring(var.chat_port)
       EMBED_MODEL                 = var.embed_model
       EMBED_PORT                  = tostring(var.embed_port)
+      INFERENCE_HEALTH_PATH       = var.inference_health_path
     }
   }
 

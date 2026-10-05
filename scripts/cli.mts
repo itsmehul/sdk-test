@@ -276,7 +276,7 @@ const groups: ReadonlyArray<{ label: string; hint: string; tasks: readonly TaskI
   },
   {
     label: "Deploy",
-    hint: "AWS Lambda + spot GPU via Terraform",
+    hint: "AWS Lambda + spot inference instance via Terraform",
     tasks: ["bundle", "tfInit", "tfPlan", "tfApply", "tfOutput", "tfDestroy"],
   },
   {

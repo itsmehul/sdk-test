@@ -11,6 +11,8 @@ type Kind = "chat" | "embed";
 export type GpuConfig = {
   asgName: string;
   ports: Record<Kind, number>;
+  /** vLLM serves `/health`; Ollama answers on `/`. */
+  healthPath?: string;
   /** Seconds clients should wait while the instance boots and loads models. */
   retryAfter?: number;
 };
@@ -73,7 +75,9 @@ export function gpuResolver(config: GpuConfig) {
     }
 
     const origin = `http://${ip}:${config.ports[kind]}`;
-    const ok = await fetch(`${origin}/health`, { signal: AbortSignal.timeout(2_000) })
+    const ok = await fetch(`${origin}${config.healthPath ?? "/health"}`, {
+      signal: AbortSignal.timeout(2_000),
+    })
       .then((r) => r.ok)
       .catch(() => false);
     if (!ok) throw loading(`loading ${kind} model`);

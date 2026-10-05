@@ -14,6 +14,28 @@ variable "az_count" {
   default     = 2
 }
 
+variable "inference_backend" {
+  description = "`gpu` serves vLLM on NVIDIA spot instances (needs G-family vCPU quota); `cpu` serves Ollama on Graviton."
+  type        = string
+  default     = "cpu"
+}
+
+variable "cpu_instance_types" {
+  description = "4 vCPU / 8 GB Graviton instances; extra types widen spot capacity."
+  type        = list(string)
+  default     = ["c7g.xlarge", "c6g.xlarge", "m7g.xlarge"]
+}
+
+variable "ollama_chat_model" {
+  type    = string
+  default = "qwen2.5:1.5b"
+}
+
+variable "ollama_embed_model" {
+  type    = string
+  default = "nomic-embed-text:v1.5"
+}
+
 variable "gpu_instance_types" {
   description = "g4dn.xlarge (T4 16 GB) is the cheapest NVIDIA instance; g6.xlarge (L4) is the fallback."
   type        = list(string)
@@ -46,7 +68,7 @@ variable "embed_model" {
 }
 
 variable "idle_minutes" {
-  description = "Minutes without requests before the GPU instance terminates itself."
+  description = "Minutes without requests before the inference instance terminates itself."
   type        = number
   default     = 15
 }

@@ -1,0 +1,100 @@
+#!/bin/bash
+set -euo pipefail
+exec > >(tee -a /var/log/rightpeople-boot.log) 2>&1
+
+export HOME=/root
+export PATH="$PATH:/snap/bin"
+REGION="${region}"
+BUCKET="${bucket}"
+MODELS=/opt/ollama/models
+DROPIN=/etc/systemd/system/ollama.service.d
+
+if ! command -v aws >/dev/null; then
+  snap install aws-cli --classic
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get -o DPkg::Lock::Timeout=300 update -qq
+apt-get -o DPkg::Lock::Timeout=300 install -y -qq zstd
+curl -fsSL https://ollama.com/install.sh | sh
+systemctl stop ollama
+
+# Loopback only until both models are pulled, so the API's health check means "ready".
+# KEEP_ALIVE doubles as the idle signal: a model unloads after that long without requests.
+mkdir -p "$MODELS" "$DROPIN"
+cat > "$DROPIN/10-rightpeople.conf" <<UNIT
+[Service]
+Environment=OLLAMA_MODELS=$MODELS
+Environment=OLLAMA_HOST=127.0.0.1:${chat_port}
+Environment=OLLAMA_CONTEXT_LENGTH=${chat_max_model_len}
+Environment=OLLAMA_KEEP_ALIVE=${idle_minutes}m
+UNIT
+
+# Models are cached in S3 after the first boot so later cold starts skip the Ollama registry.
+PREFIX="s3://$BUCKET/ollama"
+CACHED=0
+if aws s3 ls "$PREFIX/manifests/" --region "$REGION" >/dev/null 2>&1; then
+  aws s3 sync "$PREFIX" "$MODELS" --region "$REGION" --only-show-errors
+  CACHED=1
+fi
+chown -R ollama:ollama /opt/ollama
+
+systemctl daemon-reload
+systemctl start ollama
+export OLLAMA_HOST=127.0.0.1:${chat_port}
+until ollama list >/dev/null 2>&1; do sleep 1; done
+ollama pull "${chat_model}"
+ollama pull "${embed_model}"
+if [ "$CACHED" = 0 ]; then
+  aws s3 sync "$MODELS" "$PREFIX" --region "$REGION" --only-show-errors
+fi
+
+cat > "$DROPIN/20-listen.conf" <<UNIT
+[Service]
+Environment=OLLAMA_HOST=0.0.0.0:${chat_port}
+UNIT
+systemctl daemon-reload
+systemctl restart ollama
+
+# Terminates this instance (and drops the group to zero) once no model has been used for
+# ${idle_minutes} minutes, after an equal grace period from boot.
+cat > /usr/local/bin/rightpeople-idle-check <<'SCRIPT'
+#!/bin/bash
+set -euo pipefail
+export PATH="$PATH:/snap/bin"
+if (( $(cut -d. -f1 /proc/uptime) < ${idle_minutes} * 60 )); then
+  exit 0
+fi
+if OLLAMA_HOST=127.0.0.1:${chat_port} ollama ps | tail -n +2 | grep -q .; then
+  exit 0
+fi
+TOKEN=$(curl -sX PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+aws autoscaling terminate-instance-in-auto-scaling-group --region "${region}" \
+  --instance-id "$ID" --should-decrement-desired-capacity
+SCRIPT
+chmod +x /usr/local/bin/rightpeople-idle-check
+
+cat > /etc/systemd/system/rightpeople-idle.service <<'UNIT'
+[Unit]
+Description=Terminate idle inference instance
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/rightpeople-idle-check
+UNIT
+
+cat > /etc/systemd/system/rightpeople-idle.timer <<'UNIT'
+[Unit]
+Description=Check inference idleness every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now rightpeople-idle.timer

@@ -10,6 +10,16 @@ variable "security_group_id" {
   type = string
 }
 
+variable "backend" {
+  description = "`gpu` runs vLLM on NVIDIA instances; `cpu` runs Ollama on Graviton (arm64) instances."
+  type        = string
+
+  validation {
+    condition     = contains(["gpu", "cpu"], var.backend)
+    error_message = "backend must be \"gpu\" or \"cpu\"."
+  }
+}
+
 variable "instance_types" {
   description = "Cheapest first; extra types widen spot capacity."
   type        = list(string)
@@ -20,8 +30,7 @@ variable "use_spot" {
 }
 
 variable "root_volume_gb" {
-  type    = number
-  default = 100
+  type = number
 }
 
 variable "vllm_version" {
@@ -29,7 +38,7 @@ variable "vllm_version" {
 }
 
 variable "chat_model" {
-  description = "Hugging Face repo id, also used as the vLLM served model name."
+  description = "Hugging Face repo id (gpu) or Ollama tag (cpu); also the served model name."
   type        = string
 }
 
