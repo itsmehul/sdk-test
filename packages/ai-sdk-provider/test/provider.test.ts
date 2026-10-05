@@ -1,19 +1,19 @@
-import { createApp, echoEngine } from "@interfaze/api";
+import { createApp, echoEngine } from "@rightpeople/api";
 import { embedMany, generateText, streamText } from "ai";
 import { describe, expect, it } from "vitest";
-import { createInterfaze } from "../src";
+import { createRightPeople } from "../src";
 
 const app = createApp({ apiKey: "test-key", engine: echoEngine });
-const interfaze = createInterfaze({
+const rightpeople = createRightPeople({
   apiKey: "test-key",
   baseURL: "http://localhost/v1",
   fetch: async (input, init) => app.fetch(new Request(input, init)),
 });
 
-describe("Interfaze AI SDK provider", () => {
+describe("RightPeople AI SDK provider", () => {
   it("generates text", async () => {
     const { text, usage } = await generateText({
-      model: interfaze("interfaze-beta"),
+      model: rightpeople("rightpeople-beta"),
       prompt: "hello there",
     });
     expect(text).toBe("Echo: hello there");
@@ -21,7 +21,7 @@ describe("Interfaze AI SDK provider", () => {
   });
 
   it("streams text", async () => {
-    const result = streamText({ model: interfaze("interfaze-beta"), prompt: "one two three" });
+    const result = streamText({ model: rightpeople("rightpeople-beta"), prompt: "one two three" });
     let text = "";
     for await (const delta of result.textStream) text += delta;
     expect(text).toBe("Echo: one two three");
@@ -29,20 +29,20 @@ describe("Interfaze AI SDK provider", () => {
 
   it("embeds values", async () => {
     const { embeddings } = await embedMany({
-      model: interfaze.embeddingModel("interfaze-embed"),
+      model: rightpeople.embeddingModel("rightpeople-embed"),
       values: ["a", "b"],
     });
     expect(embeddings).toHaveLength(2);
   });
 
   it("surfaces auth failures", async () => {
-    const bad = createInterfaze({
+    const bad = createRightPeople({
       apiKey: "wrong",
       baseURL: "http://localhost/v1",
       fetch: async (input, init) => app.fetch(new Request(input, init)),
     });
     await expect(
-      generateText({ model: bad("interfaze-beta"), prompt: "x", maxRetries: 0 }),
+      generateText({ model: bad("rightpeople-beta"), prompt: "x", maxRetries: 0 }),
     ).rejects.toThrow(/Invalid API key/);
   });
 });

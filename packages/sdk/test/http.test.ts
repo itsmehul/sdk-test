@@ -4,8 +4,8 @@ import {
   APIConnectionTimeoutError,
   APIUserAbortError,
   BadRequestError,
-  Interfaze,
-  InterfazeError,
+  RightPeople,
+  RightPeopleError,
   RateLimitError,
 } from "../src";
 
@@ -32,7 +32,7 @@ function setup(responses: Array<Response | Error>, options: Partial<{ maxRetries
     if (next instanceof Error) throw next;
     return next;
   });
-  const client = new Interfaze({
+  const client = new RightPeople({
     apiKey: "k",
     baseURL: "http://test/v1",
     fetch,
@@ -43,8 +43,8 @@ function setup(responses: Array<Response | Error>, options: Partial<{ maxRetries
 
 describe("http core", () => {
   it("requires an API key", () => {
-    vi.stubEnv("INTERFAZE_API_KEY", "");
-    expect(() => new Interfaze({ apiKey: undefined })).toThrow(InterfazeError);
+    vi.stubEnv("RIGHTPEOPLE_API_KEY", "");
+    expect(() => new RightPeople({ apiKey: undefined })).toThrow(RightPeopleError);
     vi.unstubAllEnvs();
   });
 
@@ -53,7 +53,7 @@ describe("http core", () => {
     await client.models.list();
     const headers = requests[0]?.headers;
     expect(headers?.get("authorization")).toBe("Bearer k");
-    expect(headers?.get("x-interfaze-sdk")).toMatch(/^typescript\//);
+    expect(headers?.get("x-rightpeople-sdk")).toMatch(/^typescript\//);
   });
 
   it("retries 5xx with the same idempotency key", async () => {
@@ -66,7 +66,7 @@ describe("http core", () => {
     expect(requests).toHaveLength(3);
     const keys = new Set(requests.map((r) => r.headers.get("idempotency-key")));
     expect(keys.size).toBe(1);
-    expect(requests.map((r) => r.headers.get("x-interfaze-retry-count"))).toEqual(["0", "1", "2"]);
+    expect(requests.map((r) => r.headers.get("x-rightpeople-retry-count"))).toEqual(["0", "1", "2"]);
   });
 
   it("gives up after maxRetries and throws a typed error", async () => {
@@ -97,7 +97,7 @@ describe("http core", () => {
   });
 
   it("times out per attempt", async () => {
-    const client = new Interfaze({
+    const client = new RightPeople({
       apiKey: "k",
       baseURL: "http://test/v1",
       maxRetries: 0,
@@ -108,7 +108,7 @@ describe("http core", () => {
   });
 
   it("supports caller cancellation before and during a request", async () => {
-    const client = new Interfaze({ apiKey: "k", baseURL: "http://test/v1", fetch: hang });
+    const client = new RightPeople({ apiKey: "k", baseURL: "http://test/v1", fetch: hang });
 
     const early = new AbortController();
     early.abort();
@@ -124,7 +124,7 @@ describe("http core", () => {
 
   it("runs hooks", async () => {
     const seen: number[] = [];
-    const client = new Interfaze({
+    const client = new RightPeople({
       apiKey: "k",
       baseURL: "http://test/v1",
       fetch: async (request) => json({ ...models, auth: request.headers.get("authorization") }),

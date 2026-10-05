@@ -1,4 +1,4 @@
-export { Interfaze } from "./client";
+export { RightPeople } from "./client";
 export {
   APIConnectionError,
   APIConnectionTimeoutError,
@@ -7,7 +7,7 @@ export {
   AuthenticationError,
   BadRequestError,
   ConflictError,
-  InterfazeError,
+  RightPeopleError,
   InternalServerError,
   NotFoundError,
   PermissionDeniedError,

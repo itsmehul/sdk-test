@@ -1,9 +1,9 @@
 {
-  "name": "@interfaze/ai-sdk-provider",
+  "name": "@rightpeople/ai-sdk-provider",
   "version": "0.1.0",
-  "description": "Interfaze provider for the Vercel AI SDK",
+  "description": "RightPeople provider for the Vercel AI SDK",
   "keywords": [
-    "interfaze",
+    "rightpeople",
     "ai-sdk",
     "vercel",
     "provider",
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/interfaze/sdk.git",
+    "url": "git+https://github.com/rightpeople/sdk.git",
     "directory": "packages/ai-sdk-provider"
   },
   "type": "module",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@interfaze/api": "workspace:*",
+    "@rightpeople/api": "workspace:*",
     "@types/node": "^26.6.4",
     "ai": "^7.0.127",
     "publint": "^0.3.25",

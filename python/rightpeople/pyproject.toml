@@ -1,11 +1,11 @@
 [project]
-name = "interfaze"
+name = "rightpeople"
 version = "0.1.0"
-description = "Official Python SDK for the Interfaze API"
-readme = { text = "Official Python SDK for the Interfaze API.", content-type = "text/plain" }
+description = "Official Python SDK for the RightPeople API"
+readme = { text = "Official Python SDK for the RightPeople API.", content-type = "text/plain" }
 license = "MIT"
 requires-python = ">=3.10"
-keywords = ["interfaze", "ai", "llm", "openai-compatible", "sdk"]
+keywords = ["rightpeople", "ai", "llm", "openai-compatible", "sdk"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -17,11 +17,11 @@ classifiers = [
 dependencies = ["httpx>=0.27,<1", "pydantic>=2.7,<3", "typing-extensions>=4.12"]
 
 [project.urls]
-Repository = "https://github.com/interfaze/sdk"
+Repository = "https://github.com/rightpeople/sdk"
 
 [build-system]
 requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/interfaze"]
+packages = ["src/rightpeople"]

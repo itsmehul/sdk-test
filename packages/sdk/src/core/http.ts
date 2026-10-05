@@ -4,12 +4,12 @@ import {
   APIConnectionTimeoutError,
   APIError,
   APIUserAbortError,
-  InterfazeError,
+  RightPeopleError,
 } from "./errors";
 import { retryDelay, shouldRetry, sleep } from "./retry";
 import { Stream } from "./streaming";
 
-export const DEFAULT_BASE_URL = "https://api.interfaze.ai/v1";
+export const DEFAULT_BASE_URL = "https://api.rightpeople.ai/v1";
 const DEFAULT_TIMEOUT_MS = 60_000;
 const DEFAULT_MAX_RETRIES = 2;
 
@@ -26,9 +26,9 @@ export interface Hooks {
 }
 
 export interface ClientOptions {
-  /** Defaults to `process.env.INTERFAZE_API_KEY`. */
+  /** Defaults to `process.env.RIGHTPEOPLE_API_KEY`. */
   apiKey?: string;
-  /** Defaults to `process.env.INTERFAZE_BASE_URL`, then `https://api.interfaze.ai/v1`. */
+  /** Defaults to `process.env.RIGHTPEOPLE_BASE_URL`, then `https://api.rightpeople.ai/v1`. */
   baseURL?: string;
   /** Milliseconds to wait for response headers per attempt. Default 60s. */
   timeout?: number;
@@ -70,14 +70,14 @@ export class APIClient {
   #hooks: Hooks;
 
   constructor(options: ClientOptions = {}) {
-    const apiKey = options.apiKey ?? env("INTERFAZE_API_KEY");
+    const apiKey = options.apiKey ?? env("RIGHTPEOPLE_API_KEY");
     if (!apiKey) {
-      throw new InterfazeError(
-        "Missing API key. Pass `apiKey` or set the INTERFAZE_API_KEY environment variable.",
+      throw new RightPeopleError(
+        "Missing API key. Pass `apiKey` or set the RIGHTPEOPLE_API_KEY environment variable.",
       );
     }
     this.#apiKey = apiKey;
-    this.baseURL = (options.baseURL ?? env("INTERFAZE_BASE_URL") ?? DEFAULT_BASE_URL).replace(
+    this.baseURL = (options.baseURL ?? env("RIGHTPEOPLE_BASE_URL") ?? DEFAULT_BASE_URL).replace(
       /\/+$/,
       "",
     );
@@ -114,8 +114,8 @@ export class APIClient {
     const headers = new Headers({
       Accept: "application/json",
       Authorization: `Bearer ${this.#apiKey}`,
-      "X-Interfaze-SDK": `typescript/${VERSION}`,
-      "X-Interfaze-Retry-Count": String(attempt),
+      "X-RightPeople-SDK": `typescript/${VERSION}`,
+      "X-RightPeople-Retry-Count": String(attempt),
       ...this.#defaultHeaders,
       ...spec.options?.headers,
     });

@@ -13,7 +13,7 @@ export const ErrorResponse = z
 
 export const Model = z
   .object({
-    id: z.string().openapi({ example: "interfaze-beta" }),
+    id: z.string().openapi({ example: "rightpeople-beta" }),
     object: z.literal("model"),
     created: z.number().int(),
     owned_by: z.string(),
@@ -77,7 +77,7 @@ export const Tool = z
 
 export const ChatCompletionRequest = z
   .object({
-    model: z.string().openapi({ example: "interfaze-beta" }),
+    model: z.string().openapi({ example: "rightpeople-beta" }),
     messages: z.array(ChatMessage).min(1),
     temperature: z.number().min(0).max(2).optional(),
     top_p: z.number().min(0).max(1).optional(),
@@ -165,7 +165,7 @@ export const ChatCompletionChunk = z
 
 export const EmbeddingRequest = z
   .object({
-    model: z.string().openapi({ example: "interfaze-embed" }),
+    model: z.string().openapi({ example: "rightpeople-embed" }),
     input: z.union([z.string(), z.array(z.string()).min(1)]),
     dimensions: z.number().int().positive().max(4096).optional(),
     encoding_format: z.enum(["float", "base64"]).optional(),

@@ -1,8 +1,8 @@
 import type { ChatCompletionRequest } from "./schemas";
 
 export const MODELS = [
-  { id: "interfaze-beta", owned_by: "interfaze", created: 1_759_622_400 },
-  { id: "interfaze-embed", owned_by: "interfaze", created: 1_759_622_400 },
+  { id: "rightpeople-beta", owned_by: "rightpeople", created: 1_759_622_400 },
+  { id: "rightpeople-embed", owned_by: "rightpeople", created: 1_759_622_400 },
 ] as const;
 
 export type FinishReason = "stop" | "length";
@@ -230,9 +230,9 @@ export const echoEngine: Engine = {
   },
 };
 
-/** `INTERFAZE_ENGINE=echo` for tests; otherwise an OpenAI-compatible backend (Ollama by default). */
+/** `RIGHTPEOPLE_ENGINE=echo` for tests; otherwise an OpenAI-compatible backend (Ollama by default). */
 export function engineFromEnv(env: NodeJS.ProcessEnv = process.env): Engine {
-  if (env.INTERFAZE_ENGINE === "echo") return echoEngine;
+  if (env.RIGHTPEOPLE_ENGINE === "echo") return echoEngine;
   return openAICompatibleEngine({
     baseURL: env.INFERENCE_BASE_URL ?? "http://localhost:11434/v1",
     apiKey: env.INFERENCE_API_KEY,

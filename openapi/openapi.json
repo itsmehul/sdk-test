@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Interfaze API",
+    "title": "RightPeople API",
     "version": "1.0.0",
-    "description": "OpenAI-compatible API for Interfaze models."
+    "description": "OpenAI-compatible API for RightPeople models."
   },
   "servers": [
     {
-      "url": "https://api.interfaze.ai",
+      "url": "https://api.rightpeople.ai",
       "description": "Production"
     }
   ],
@@ -50,7 +50,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": "interfaze-beta"
+            "example": "rightpeople-beta"
           },
           "object": {
             "type": "string",
@@ -337,7 +337,7 @@
         "properties": {
           "model": {
             "type": "string",
-            "example": "interfaze-beta"
+            "example": "rightpeople-beta"
           },
           "messages": {
             "type": "array",
@@ -734,7 +734,7 @@
         "properties": {
           "model": {
             "type": "string",
-            "example": "interfaze-embed"
+            "example": "rightpeople-embed"
           },
           "input": {
             "anyOf": [
@@ -817,7 +817,7 @@
           {
             "schema": {
               "type": "string",
-              "example": "interfaze-beta"
+              "example": "rightpeople-beta"
             },
             "required": true,
             "name": "model",

@@ -5,32 +5,32 @@ import struct
 
 import pytest
 
-from interfaze import (
-    AsyncInterfaze,
+from rightpeople import (
+    AsyncRightPeople,
     AuthenticationError,
     BadRequestError,
-    Interfaze,
+    RightPeople,
     NotFoundError,
 )
 
 
 @pytest.fixture
-def client(base_url: str, api_key: str) -> Interfaze:
-    return Interfaze(api_key=api_key, base_url=base_url)
+def client(base_url: str, api_key: str) -> RightPeople:
+    return RightPeople(api_key=api_key, base_url=base_url)
 
 
 @pytest.fixture
-def async_client(base_url: str, api_key: str) -> AsyncInterfaze:
-    return AsyncInterfaze(api_key=api_key, base_url=base_url)
+def async_client(base_url: str, api_key: str) -> AsyncRightPeople:
+    return AsyncRightPeople(api_key=api_key, base_url=base_url)
 
 
-def test_models(client: Interfaze) -> None:
+def test_models(client: RightPeople) -> None:
     models = client.models.list()
-    assert "interfaze-beta" in [m.id for m in models.data]
-    assert client.models.retrieve("interfaze-beta").object == "model"
+    assert "rightpeople-beta" in [m.id for m in models.data]
+    assert client.models.retrieve("rightpeople-beta").object == "model"
 
 
-def test_not_found(client: Interfaze) -> None:
+def test_not_found(client: RightPeople) -> None:
     with pytest.raises(NotFoundError) as info:
         client.models.retrieve("nope")
     assert info.value.status_code == 404
@@ -40,18 +40,18 @@ def test_not_found(client: Interfaze) -> None:
 
 def test_auth_error(base_url: str) -> None:
     with pytest.raises(AuthenticationError):
-        Interfaze(api_key="wrong", base_url=base_url).models.list()
+        RightPeople(api_key="wrong", base_url=base_url).models.list()
 
 
-def test_validation_error(client: Interfaze) -> None:
+def test_validation_error(client: RightPeople) -> None:
     with pytest.raises(BadRequestError) as info:
-        client.chat.completions.create(model="interfaze-beta", messages=[])
+        client.chat.completions.create(model="rightpeople-beta", messages=[])
     assert info.value.param == "messages"
 
 
-def test_chat_completion(client: Interfaze) -> None:
+def test_chat_completion(client: RightPeople) -> None:
     completion = client.chat.completions.create(
-        model="interfaze-beta",
+        model="rightpeople-beta",
         messages=[{"role": "user", "content": "Say hello."}],
         temperature=0,
         max_tokens=16,
@@ -63,9 +63,9 @@ def test_chat_completion(client: Interfaze) -> None:
     assert completion.usage.completion_tokens > 0
 
 
-def test_chat_stream(client: Interfaze) -> None:
+def test_chat_stream(client: RightPeople) -> None:
     with client.chat.completions.create(
-        model="interfaze-beta",
+        model="rightpeople-beta",
         messages=[{"role": "user", "content": "Count to three."}],
         stream=True,
         stream_options={"include_usage": True},
@@ -81,17 +81,17 @@ def test_chat_stream(client: Interfaze) -> None:
     assert chunks[-1].usage.completion_tokens > 0
 
 
-def test_embeddings(client: Interfaze) -> None:
-    res = client.embeddings.create(model="interfaze-embed", input=["a", "b"], dimensions=8)
+def test_embeddings(client: RightPeople) -> None:
+    res = client.embeddings.create(model="rightpeople-embed", input=["a", "b"], dimensions=8)
     assert len(res.data) == 2
     assert isinstance(res.data[0].embedding, list)
     assert len(res.data[0].embedding) == 8
 
 
-def test_embeddings_base64(client: Interfaze) -> None:
-    floats = client.embeddings.create(model="interfaze-embed", input="a", dimensions=4)
+def test_embeddings_base64(client: RightPeople) -> None:
+    floats = client.embeddings.create(model="rightpeople-embed", input="a", dimensions=4)
     encoded = client.embeddings.create(
-        model="interfaze-embed", input="a", dimensions=4, encoding_format="base64"
+        model="rightpeople-embed", input="a", dimensions=4, encoding_format="base64"
     )
     raw = encoded.data[0].embedding
     assert isinstance(raw, str)
@@ -99,17 +99,17 @@ def test_embeddings_base64(client: Interfaze) -> None:
     assert decoded == pytest.approx(floats.data[0].embedding, abs=1e-4)
 
 
-async def test_async_chat(async_client: AsyncInterfaze) -> None:
+async def test_async_chat(async_client: AsyncRightPeople) -> None:
     async with async_client:
         completion = await async_client.chat.completions.create(
-            model="interfaze-beta",
+            model="rightpeople-beta",
             messages=[{"role": "user", "content": "Say hi."}],
             max_tokens=16,
         )
         assert completion.choices[0].message.content
 
         stream = await async_client.chat.completions.create(
-            model="interfaze-beta",
+            model="rightpeople-beta",
             messages=[{"role": "user", "content": "Say hi."}],
             stream=True,
             max_tokens=16,

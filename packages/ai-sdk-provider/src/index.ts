@@ -6,41 +6,41 @@ import {
   withoutTrailingSlash,
 } from "@ai-sdk/provider-utils";
 
-export const DEFAULT_BASE_URL = "https://api.interfaze.ai/v1";
+export const DEFAULT_BASE_URL = "https://api.rightpeople.ai/v1";
 
-export type InterfazeChatModelId = "interfaze-beta" | (string & {});
-export type InterfazeEmbeddingModelId = "interfaze-embed" | (string & {});
+export type RightPeopleChatModelId = "rightpeople-beta" | (string & {});
+export type RightPeopleEmbeddingModelId = "rightpeople-embed" | (string & {});
 
-export interface InterfazeProviderSettings {
-  /** Defaults to the `INTERFAZE_API_KEY` environment variable, read at request time. */
+export interface RightPeopleProviderSettings {
+  /** Defaults to the `RIGHTPEOPLE_API_KEY` environment variable, read at request time. */
   apiKey?: string;
-  /** Defaults to `INTERFAZE_BASE_URL`, then `https://api.interfaze.ai/v1`. */
+  /** Defaults to `RIGHTPEOPLE_BASE_URL`, then `https://api.rightpeople.ai/v1`. */
   baseURL?: string;
   headers?: Record<string, string>;
   /** Custom fetch implementation, e.g. for proxies or tests. */
   fetch?: FetchFunction;
 }
 
-export type InterfazeProvider = OpenAICompatibleProvider<
-  InterfazeChatModelId,
-  InterfazeChatModelId,
-  InterfazeEmbeddingModelId,
+export type RightPeopleProvider = OpenAICompatibleProvider<
+  RightPeopleChatModelId,
+  RightPeopleChatModelId,
+  RightPeopleEmbeddingModelId,
   string
 >;
 
 /**
- * Create an Interfaze provider for the Vercel AI SDK.
+ * Create an RightPeople provider for the Vercel AI SDK.
  *
  * @example
- * const interfaze = createInterfaze({ apiKey: process.env.INTERFAZE_API_KEY });
- * const { text } = await generateText({ model: interfaze("interfaze-beta"), prompt: "Hi" });
+ * const rightpeople = createRightPeople({ apiKey: process.env.RIGHTPEOPLE_API_KEY });
+ * const { text } = await generateText({ model: rightpeople("rightpeople-beta"), prompt: "Hi" });
  */
-export function createInterfaze(settings: InterfazeProviderSettings = {}): InterfazeProvider {
+export function createRightPeople(settings: RightPeopleProviderSettings = {}): RightPeopleProvider {
   const baseURL =
     withoutTrailingSlash(
       loadOptionalSetting({
         settingValue: settings.baseURL,
-        environmentVariableName: "INTERFAZE_BASE_URL",
+        environmentVariableName: "RIGHTPEOPLE_BASE_URL",
       }),
     ) ?? DEFAULT_BASE_URL;
 
@@ -49,8 +49,8 @@ export function createInterfaze(settings: InterfazeProviderSettings = {}): Inter
     if (!headers.has("authorization")) {
       const apiKey = loadApiKey({
         apiKey: settings.apiKey,
-        environmentVariableName: "INTERFAZE_API_KEY",
-        description: "Interfaze",
+        environmentVariableName: "RIGHTPEOPLE_API_KEY",
+        description: "RightPeople",
       });
       headers.set("Authorization", `Bearer ${apiKey}`);
     }
@@ -58,7 +58,7 @@ export function createInterfaze(settings: InterfazeProviderSettings = {}): Inter
   };
 
   return createOpenAICompatible({
-    name: "interfaze",
+    name: "rightpeople",
     baseURL,
     headers: settings.headers,
     fetch: authorizedFetch,
@@ -68,4 +68,4 @@ export function createInterfaze(settings: InterfazeProviderSettings = {}): Inter
 }
 
 /** Default provider instance configured from environment variables. */
-export const interfaze: InterfazeProvider = createInterfaze();
+export const rightpeople: RightPeopleProvider = createRightPeople();

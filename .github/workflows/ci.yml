@@ -39,7 +39,7 @@ jobs:
       - name: OpenAPI spec and generated types are up to date
         run: |
           pnpm exec turbo run generate
-          git diff --exit-code -- openapi packages/sdk/src/generated python/interfaze/src/interfaze/_generated
+          git diff --exit-code -- openapi packages/sdk/src/generated python/rightpeople/src/rightpeople/_generated
       - run: pnpm exec turbo run build typecheck test lint:pkg lint:types
 
   python:

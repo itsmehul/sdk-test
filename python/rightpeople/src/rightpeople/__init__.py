@@ -13,7 +13,7 @@ from ._errors import (
     AuthenticationError,
     BadRequestError,
     ConflictError,
-    InterfazeError,
+    RightPeopleError,
     InternalServerError,
     NotFoundError,
     PermissionDeniedError,
@@ -25,14 +25,14 @@ from ._version import __version__
 from .resources import AsyncChat, AsyncEmbeddings, AsyncModels, Chat, Embeddings, Models
 
 
-class Interfaze(SyncAPIClient):
-    """Interfaze API client.
+class RightPeople(SyncAPIClient):
+    """RightPeople API client.
 
     Instances are independent, so create one per credential or configuration and share it.
 
-    >>> client = Interfaze()  # reads INTERFAZE_API_KEY
+    >>> client = RightPeople()  # reads RIGHTPEOPLE_API_KEY
     >>> client.chat.completions.create(
-    ...     model="interfaze-beta", messages=[{"role": "user", "content": "Hello"}]
+    ...     model="rightpeople-beta", messages=[{"role": "user", "content": "Hello"}]
     ... )
     """
 
@@ -63,8 +63,8 @@ class Interfaze(SyncAPIClient):
         self.embeddings = Embeddings(self)
 
 
-class AsyncInterfaze(AsyncAPIClient):
-    """Async Interfaze API client. Same surface as `Interfaze` with awaitable methods."""
+class AsyncRightPeople(AsyncAPIClient):
+    """Async RightPeople API client. Same surface as `RightPeople` with awaitable methods."""
 
     chat: AsyncChat
     models: AsyncModels
@@ -98,13 +98,13 @@ __all__ = [
     "APIConnectionError",
     "APIError",
     "APITimeoutError",
-    "AsyncInterfaze",
+    "AsyncRightPeople",
     "AsyncStream",
     "AuthenticationError",
     "BadRequestError",
     "ConflictError",
-    "Interfaze",
-    "InterfazeError",
+    "RightPeople",
+    "RightPeopleError",
     "InternalServerError",
     "NotFoundError",
     "PermissionDeniedError",

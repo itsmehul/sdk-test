@@ -4,16 +4,16 @@ from collections.abc import Callable
 from typing import Any
 
 import httpx
-import interfaze._client
+import rightpeople._client
 import pytest
 
-from interfaze import (
+from rightpeople import (
     APIConnectionError,
     APITimeoutError,
-    AsyncInterfaze,
+    AsyncRightPeople,
     BadRequestError,
-    Interfaze,
-    InterfazeError,
+    RightPeople,
+    RightPeopleError,
     InternalServerError,
     RateLimitError,
 )
@@ -35,12 +35,12 @@ def _no_delay(*_args: object, **_kwargs: object) -> float:
 
 @pytest.fixture(autouse=True)
 def no_backoff(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(interfaze._client, "retry_delay", _no_delay)
+    monkeypatch.setattr(rightpeople._client, "retry_delay", _no_delay)
 
 
 def make_client(
     responses: list[httpx.Response | Exception], **kwargs: int
-) -> tuple[Interfaze, list[httpx.Request]]:
+) -> tuple[RightPeople, list[httpx.Request]]:
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -50,7 +50,7 @@ def make_client(
             raise next_item
         return next_item
 
-    client = Interfaze(
+    client = RightPeople(
         api_key="k",
         base_url="http://test/v1",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
@@ -60,16 +60,16 @@ def make_client(
 
 
 def test_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("INTERFAZE_API_KEY", raising=False)
-    with pytest.raises(InterfazeError):
-        Interfaze()
+    monkeypatch.delenv("RIGHTPEOPLE_API_KEY", raising=False)
+    with pytest.raises(RightPeopleError):
+        RightPeople()
 
 
 def test_sends_auth_and_sdk_headers() -> None:
     client, seen = make_client([httpx.Response(200, json=MODELS)])
     client.models.list()
     assert seen[0].headers["authorization"] == "Bearer k"
-    assert seen[0].headers["x-interfaze-sdk"].startswith("python/")
+    assert seen[0].headers["x-rightpeople-sdk"].startswith("python/")
 
 
 def test_retries_5xx_with_same_idempotency_key() -> None:
@@ -79,7 +79,7 @@ def test_retries_5xx_with_same_idempotency_key() -> None:
     client.embeddings.create(model="m", input="x")
     assert len(seen) == 3
     assert len({r.headers["idempotency-key"] for r in seen}) == 1
-    assert [r.headers["x-interfaze-retry-count"] for r in seen] == ["0", "1", "2"]
+    assert [r.headers["x-rightpeople-retry-count"] for r in seen] == ["0", "1", "2"]
 
 
 def test_gives_up_after_max_retries() -> None:
@@ -134,7 +134,7 @@ async def test_async_retries() -> None:
         calls.append(request)
         return responses.pop(0)
 
-    client = AsyncInterfaze(
+    client = AsyncRightPeople(
         api_key="k",
         base_url="http://test/v1",
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),

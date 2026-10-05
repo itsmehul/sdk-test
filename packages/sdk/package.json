@@ -1,9 +1,9 @@
 {
-  "name": "@interfaze/sdk",
+  "name": "@rightpeople/sdk",
   "version": "0.1.0",
-  "description": "Official TypeScript SDK for the Interfaze API",
+  "description": "Official TypeScript SDK for the RightPeople API",
   "keywords": [
-    "interfaze",
+    "rightpeople",
     "ai",
     "llm",
     "openai-compatible",
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/interfaze/sdk.git",
+    "url": "git+https://github.com/rightpeople/sdk.git",
     "directory": "packages/sdk"
   },
   "type": "module",
@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@interfaze/api": "workspace:*",
+    "@rightpeople/api": "workspace:*",
     "@types/node": "^26.6.4",
     "openapi-typescript": "^7.13.0",
     "publint": "^0.3.25",

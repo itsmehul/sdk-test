@@ -14,11 +14,11 @@ import httpx
 from pydantic import BaseModel
 from typing_extensions import Self
 
-from ._errors import APIConnectionError, APIError, APITimeoutError, InterfazeError
+from ._errors import APIConnectionError, APIError, APITimeoutError, RightPeopleError
 from ._retry import retry_delay, should_retry
 from ._version import __version__
 
-DEFAULT_BASE_URL = "https://api.interfaze.ai/v1"
+DEFAULT_BASE_URL = "https://api.rightpeople.ai/v1"
 DEFAULT_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
 DEFAULT_MAX_RETRIES = 2
 
@@ -49,14 +49,14 @@ class _BaseClient:
         max_retries: int | None,
         default_headers: Mapping[str, str] | None,
     ) -> None:
-        resolved_key = api_key or os.environ.get("INTERFAZE_API_KEY")
+        resolved_key = api_key or os.environ.get("RIGHTPEOPLE_API_KEY")
         if not resolved_key:
-            raise InterfazeError(
-                "Missing API key. Pass `api_key` or set the INTERFAZE_API_KEY environment variable."
+            raise RightPeopleError(
+                "Missing API key. Pass `api_key` or set the RIGHTPEOPLE_API_KEY environment variable."
             )
         self.api_key = resolved_key
         self.base_url = (
-            base_url or os.environ.get("INTERFAZE_BASE_URL") or DEFAULT_BASE_URL
+            base_url or os.environ.get("RIGHTPEOPLE_BASE_URL") or DEFAULT_BASE_URL
         ).rstrip("/")
         self.timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
         self.max_retries = max_retries if max_retries is not None else DEFAULT_MAX_RETRIES
@@ -76,8 +76,8 @@ class _BaseClient:
         headers = {
             "Accept": "text/event-stream" if stream else "application/json",
             "Authorization": f"Bearer {self.api_key}",
-            "X-Interfaze-SDK": f"python/{__version__}",
-            "X-Interfaze-Retry-Count": str(attempt),
+            "X-RightPeople-SDK": f"python/{__version__}",
+            "X-RightPeople-Retry-Count": str(attempt),
             **self._default_headers,
             **(options.extra_headers or {}),
         }

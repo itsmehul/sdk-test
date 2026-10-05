@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, RootModel
 
 
 class Model(BaseModel):
-    id: Annotated[str, Field(examples=["interfaze-beta"])]
+    id: Annotated[str, Field(examples=["rightpeople-beta"])]
     object: Literal["model"]
     created: int
     owned_by: str
@@ -147,7 +147,7 @@ class Input(RootModel[list[str]]):
 
 
 class EmbeddingRequest(BaseModel):
-    model: Annotated[str, Field(examples=["interfaze-embed"])]
+    model: Annotated[str, Field(examples=["rightpeople-embed"])]
     input: str | Input
     dimensions: Annotated[int | None, Field(gt=0, le=4096)] = None
     encoding_format: Literal["float", "base64"] | None = None
@@ -195,7 +195,7 @@ class ChatCompletionMessage(BaseModel):
 
 
 class ChatCompletionRequest(BaseModel):
-    model: Annotated[str, Field(examples=["interfaze-beta"])]
+    model: Annotated[str, Field(examples=["rightpeople-beta"])]
     messages: Annotated[list[ChatCompletionMessage], Field(min_length=1)]
     temperature: Annotated[float | None, Field(ge=0.0, le=2.0)] = None
     top_p: Annotated[float | None, Field(ge=0.0, le=1.0)] = None

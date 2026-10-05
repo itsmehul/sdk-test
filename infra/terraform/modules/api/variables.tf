@@ -3,7 +3,7 @@ variable "name" {
 }
 
 variable "bundle_dir" {
-  description = "Output of `pnpm --filter @interfaze/api bundle`."
+  description = "Output of `pnpm --filter @rightpeople/api bundle`."
   type        = string
 }
 

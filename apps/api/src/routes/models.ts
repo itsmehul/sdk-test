@@ -28,7 +28,7 @@ const retrieveModel = createRoute({
     params: z.object({
       model: z
         .string()
-        .openapi({ param: { name: "model", in: "path" }, example: "interfaze-beta" }),
+        .openapi({ param: { name: "model", in: "path" }, example: "rightpeople-beta" }),
     }),
   },
   responses: {

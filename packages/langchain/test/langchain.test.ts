@@ -1,6 +1,6 @@
-import { createApp, echoEngine } from "@interfaze/api";
+import { createApp, echoEngine } from "@rightpeople/api";
 import { describe, expect, it } from "vitest";
-import { ChatInterfaze, InterfazeEmbeddings } from "../src";
+import { ChatRightPeople, RightPeopleEmbeddings } from "../src";
 
 const app = createApp({ apiKey: "test-key", engine: echoEngine });
 const connection = {
@@ -12,38 +12,38 @@ const connection = {
   },
 };
 
-describe("ChatInterfaze", () => {
+describe("ChatRightPeople", () => {
   it("invokes", async () => {
-    const model = new ChatInterfaze(connection);
+    const model = new ChatRightPeople(connection);
     const reply = await model.invoke("hi langchain");
     expect(reply.content).toBe("Echo: hi langchain");
     expect(reply.usage_metadata?.output_tokens).toBe(3);
   });
 
   it("streams", async () => {
-    const model = new ChatInterfaze(connection);
+    const model = new ChatRightPeople(connection);
     let text = "";
     for await (const chunk of await model.stream("token by token")) text += chunk.content;
     expect(text).toBe("Echo: token by token");
   });
 
-  it("reports itself as interfaze", () => {
-    const model = new ChatInterfaze(connection);
-    expect(model._llmType()).toBe("interfaze");
-    expect(ChatInterfaze.lc_name()).toBe("ChatInterfaze");
+  it("reports itself as rightpeople", () => {
+    const model = new ChatRightPeople(connection);
+    expect(model._llmType()).toBe("rightpeople");
+    expect(ChatRightPeople.lc_name()).toBe("ChatRightPeople");
   });
 
   it("requires an API key", () => {
-    const previous = process.env.INTERFAZE_API_KEY;
-    delete process.env.INTERFAZE_API_KEY;
-    expect(() => new ChatInterfaze({ baseURL: "http://localhost/v1" })).toThrow(/API key/);
-    if (previous !== undefined) process.env.INTERFAZE_API_KEY = previous;
+    const previous = process.env.RIGHTPEOPLE_API_KEY;
+    delete process.env.RIGHTPEOPLE_API_KEY;
+    expect(() => new ChatRightPeople({ baseURL: "http://localhost/v1" })).toThrow(/API key/);
+    if (previous !== undefined) process.env.RIGHTPEOPLE_API_KEY = previous;
   });
 });
 
-describe("InterfazeEmbeddings", () => {
+describe("RightPeopleEmbeddings", () => {
   it("embeds documents and queries", async () => {
-    const embeddings = new InterfazeEmbeddings({ ...connection, dimensions: 16 });
+    const embeddings = new RightPeopleEmbeddings({ ...connection, dimensions: 16 });
     const docs = await embeddings.embedDocuments(["a", "b", "c"]);
     expect(docs).toHaveLength(3);
     expect(docs[0]).toHaveLength(16);

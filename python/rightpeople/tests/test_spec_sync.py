@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import inspect
 
-from interfaze._generated import params
-from interfaze.resources.chat import ChatCompletionOptions, Completions
-from interfaze.resources.embeddings import Embeddings
+from rightpeople._generated import params
+from rightpeople.resources.chat import ChatCompletionOptions, Completions
+from rightpeople.resources.embeddings import Embeddings
 
 REQUEST_OPTIONS = {"self", "extra_headers", "timeout", "max_retries", "idempotency_key"}
 

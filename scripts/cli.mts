@@ -52,7 +52,7 @@ const example = (file: string): string[] => ["--env-file-if-exists=.env", `examp
 const uv = (...args: string[]): string[] => ["run", "--directory", "python", ...args];
 const TF_DIR = "infra/terraform/envs/prod";
 const terraform = (...args: string[]): string[] => [`-chdir=${TF_DIR}`, ...args];
-const bundleLambda: Step = { command: "pnpm", args: ["--filter", "@interfaze/api", "bundle"] };
+const bundleLambda: Step = { command: "pnpm", args: ["--filter", "@rightpeople/api", "bundle"] };
 const pyExample = (file: string): string[] => [
   "run",
   "--project",
@@ -107,31 +107,31 @@ const tasks = {
     args: ["run", "lint:pkg", "lint:types"],
   },
   exampleSdk: {
-    label: "@interfaze/sdk",
+    label: "@rightpeople/sdk",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("sdk.ts"),
   },
   exampleAiSdk: {
-    label: "@interfaze/ai-sdk-provider",
+    label: "@rightpeople/ai-sdk-provider",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("ai-sdk.ts"),
   },
   exampleLangchain: {
-    label: "@interfaze/langchain",
+    label: "@rightpeople/langchain",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("langchain.ts"),
   },
   exampleSdkPy: {
-    label: "interfaze (Python)",
+    label: "rightpeople (Python)",
     hint: "Needs `pnpm dev` running",
     command: "uv",
     args: pyExample("sdk.py"),
   },
   exampleLangchainPy: {
-    label: "langchain-interfaze (Python)",
+    label: "langchain-rightpeople (Python)",
     hint: "Needs `pnpm dev` running",
     command: "uv",
     args: pyExample("langchain.py"),
@@ -291,20 +291,20 @@ function check(label: string, ok: boolean, missing: string) {
 }
 
 console.clear();
-intro(pc.bgCyan(pc.black(" interfaze sdk ")));
+intro(pc.bgCyan(pc.black(" rightpeople sdk ")));
 
 try {
   loadEnvFile();
 } catch {}
 
 check(".env", existsSync(".env"), "missing (copy .env.example)");
-check("INTERFAZE_API_KEY", Boolean(process.env.INTERFAZE_API_KEY), "not set");
+check("RIGHTPEOPLE_API_KEY", Boolean(process.env.RIGHTPEOPLE_API_KEY), "not set");
 check("OpenAPI spec", existsSync("openapi/openapi.json"), "missing (run codegen)");
 check("SDK types", existsSync("packages/sdk/src/generated/schema.d.ts"), "missing (run codegen)");
 check("Build output", existsSync("packages/sdk/dist/index.mjs"), "missing (run build)");
 check(
   "Python models",
-  existsSync("python/interfaze/src/interfaze/_generated/models.py"),
+  existsSync("python/rightpeople/src/rightpeople/_generated/models.py"),
   "missing (run codegen)",
 );
 check("Python venv", existsSync("python/.venv"), "missing (Python → Install Python deps)");

@@ -1,6 +1,6 @@
 variable "name" {
   type    = string
-  default = "interfaze"
+  default = "rightpeople"
 }
 
 variable "region" {

@@ -1,7 +1,7 @@
-import { ChatInterfaze, InterfazeEmbeddings } from "@interfaze/langchain";
+import { ChatRightPeople, RightPeopleEmbeddings } from "@rightpeople/langchain";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const model = new ChatInterfaze({ model: "interfaze-beta" });
+const model = new ChatRightPeople({ model: "rightpeople-beta" });
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", "You are a helpful assistant."],
   ["user", "{question}"],
@@ -16,5 +16,5 @@ for await (const chunk of await model.stream("Streaming via LangChain")) {
 }
 process.stdout.write("\n");
 
-const vector = await new InterfazeEmbeddings().embedQuery("hello");
+const vector = await new RightPeopleEmbeddings().embedQuery("hello");
 console.log("embedQuery dimensions:", vector.length);

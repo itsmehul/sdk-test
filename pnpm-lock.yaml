@@ -236,13 +236,13 @@ importers:
 
   examples:
     dependencies:
-      '@interfaze/ai-sdk-provider':
+      '@rightpeople/ai-sdk-provider':
         specifier: workspace:*
         version: link:../packages/ai-sdk-provider
-      '@interfaze/langchain':
+      '@rightpeople/langchain':
         specifier: workspace:*
         version: link:../packages/langchain
-      '@interfaze/sdk':
+      '@rightpeople/sdk':
         specifier: workspace:*
         version: link:../packages/sdk
       '@langchain/core':
@@ -274,7 +274,7 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
         version: 0.18.5
-      '@interfaze/api':
+      '@rightpeople/api':
         specifier: workspace:*
         version: link:../../apps/api
       '@types/node':
@@ -305,7 +305,7 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
         version: 0.18.5
-      '@interfaze/api':
+      '@rightpeople/api':
         specifier: workspace:*
         version: link:../../apps/api
       '@langchain/core':
@@ -332,7 +332,7 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
         version: 0.18.5
-      '@interfaze/api':
+      '@rightpeople/api':
         specifier: workspace:*
         version: link:../../apps/api
       '@types/node':
@@ -356,7 +356,7 @@ importers:
 
   python:
     devDependencies:
-      '@interfaze/api':
+      '@rightpeople/api':
         specifier: workspace:*
         version: link:../apps/api
 

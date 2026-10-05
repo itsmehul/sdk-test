@@ -7,7 +7,7 @@ from datamodel_code_generator.format import Formatter
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "openapi" / "openapi.json"
-OUT = Path(__file__).resolve().parents[1] / "src" / "interfaze" / "_generated"
+OUT = Path(__file__).resolve().parents[1] / "src" / "rightpeople" / "_generated"
 
 COMMON = {
     "input_file_type": InputFileType.OpenAPI,

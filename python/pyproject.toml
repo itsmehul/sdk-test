@@ -1,5 +1,5 @@
 [project]
-name = "interfaze-python-workspace"
+name = "rightpeople-python-workspace"
 version = "0.0.0"
 requires-python = ">=3.10"
 
@@ -7,11 +7,11 @@ requires-python = ">=3.10"
 package = false
 
 [tool.uv.workspace]
-members = ["interfaze", "langchain-interfaze"]
+members = ["rightpeople", "langchain-rightpeople"]
 
 [tool.uv.sources]
-interfaze = { workspace = true }
-langchain-interfaze = { workspace = true }
+rightpeople = { workspace = true }
+langchain-rightpeople = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -20,8 +20,8 @@ dev = [
   "pytest>=9.1.1",
   "pytest-asyncio>=1.4.0",
   "ruff>=0.16.10",
-  "interfaze",
-  "langchain-interfaze",
+  "rightpeople",
+  "langchain-rightpeople",
 ]
 
 [tool.ruff]
@@ -33,7 +33,7 @@ extend-exclude = ["**/_generated/**"]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.pyright]
-include = ["interfaze/src", "langchain-interfaze/src", "interfaze/tests", "langchain-interfaze/tests"]
+include = ["rightpeople/src", "langchain-rightpeople/src", "rightpeople/tests", "langchain-rightpeople/tests"]
 exclude = ["**/_generated"]
 pythonVersion = "3.10"
 typeCheckingMode = "strict"
@@ -43,4 +43,4 @@ reportMissingTypeStubs = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
-testpaths = ["interfaze/tests", "langchain-interfaze/tests"]
+testpaths = ["rightpeople/tests", "langchain-rightpeople/tests"]

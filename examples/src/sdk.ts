@@ -1,6 +1,6 @@
-import { Interfaze, RateLimitError } from "@interfaze/sdk";
+import { RightPeople, RateLimitError } from "@rightpeople/sdk";
 
-const client = new Interfaze();
+const client = new RightPeople();
 
 const models = await client.models.list();
 console.log("Models:", models.data.map((m) => m.id).join(", "));
@@ -8,8 +8,8 @@ console.log("Models:", models.data.map((m) => m.id).join(", "));
 try {
   const completion = await client.chat.completions.create(
     {
-      model: "interfaze-beta",
-      messages: [{ role: "user", content: "Hello from @interfaze/sdk" }],
+      model: "rightpeople-beta",
+      messages: [{ role: "user", content: "Hello from @rightpeople/sdk" }],
     },
     { signal: AbortSignal.timeout(10_000) },
   );
@@ -20,7 +20,7 @@ try {
 }
 
 const stream = await client.chat.completions.create({
-  model: "interfaze-beta",
+  model: "rightpeople-beta",
   messages: [{ role: "user", content: "Stream this sentence back to me" }],
   stream: true,
 });
@@ -28,5 +28,5 @@ process.stdout.write("Stream: ");
 for await (const chunk of stream) process.stdout.write(chunk.choices[0]?.delta.content ?? "");
 process.stdout.write("\n");
 
-const { data } = await client.embeddings.create({ model: "interfaze-embed", input: "hello" });
+const { data } = await client.embeddings.create({ model: "rightpeople-embed", input: "hello" });
 console.log("Embedding dimensions:", data[0]?.embedding.length);

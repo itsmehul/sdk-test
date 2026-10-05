@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-exec > >(tee -a /var/log/interfaze-boot.log) 2>&1
+exec > >(tee -a /var/log/rightpeople-boot.log) 2>&1
 
 export HOME=/root
 REGION="${region}"
@@ -68,10 +68,10 @@ WantedBy=multi-user.target
 UNIT
 
 # Terminates this instance (and drops the group to zero) after ${idle_minutes} minutes without requests.
-cat > /usr/local/bin/interfaze-idle-check <<'SCRIPT'
+cat > /usr/local/bin/rightpeople-idle-check <<'SCRIPT'
 #!/bin/bash
 set -euo pipefail
-STATE=/var/lib/interfaze
+STATE=/var/lib/rightpeople
 mkdir -p "$STATE"
 total=$( { curl -sf http://127.0.0.1:${chat_port}/metrics || true; curl -sf http://127.0.0.1:${embed_port}/metrics || true; } \
   | awk '/^http_requests_total/ && !/handler="\/metrics"/ {s += $NF} /^vllm:prompt_tokens_total/ {s += $NF} END {printf "%d", s}')
@@ -87,18 +87,18 @@ if (( now - $(cat "$STATE/last") >= ${idle_minutes} * 60 )); then
     --instance-id "$ID" --should-decrement-desired-capacity
 fi
 SCRIPT
-chmod +x /usr/local/bin/interfaze-idle-check
+chmod +x /usr/local/bin/rightpeople-idle-check
 
-cat > /etc/systemd/system/interfaze-idle.service <<'UNIT'
+cat > /etc/systemd/system/rightpeople-idle.service <<'UNIT'
 [Unit]
 Description=Terminate idle GPU instance
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/interfaze-idle-check
+ExecStart=/usr/local/bin/rightpeople-idle-check
 UNIT
 
-cat > /etc/systemd/system/interfaze-idle.timer <<'UNIT'
+cat > /etc/systemd/system/rightpeople-idle.timer <<'UNIT'
 [Unit]
 Description=Check GPU idleness every minute
 
@@ -111,4 +111,4 @@ WantedBy=timers.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now vllm-chat.service vllm-embed.service interfaze-idle.timer
+systemctl enable --now vllm-chat.service vllm-embed.service rightpeople-idle.timer

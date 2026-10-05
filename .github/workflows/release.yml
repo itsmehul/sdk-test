@@ -22,7 +22,7 @@ jobs:
           node-version: 24
           cache: pnpm
           registry-url: https://npm.pkg.github.com
-          scope: "@interfaze"
+          scope: "@rightpeople"
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec turbo run build test lint:pkg lint:types
       - name: Open release PR or publish to npm

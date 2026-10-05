@@ -13,16 +13,16 @@ import { models } from "./routes/models";
 export const openAPIConfig: Parameters<OpenAPIHono["getOpenAPI31Document"]>[0] = {
   openapi: "3.1.0",
   info: {
-    title: "Interfaze API",
+    title: "RightPeople API",
     version: "1.0.0",
-    description: "OpenAI-compatible API for Interfaze models.",
+    description: "OpenAI-compatible API for RightPeople models.",
   },
-  servers: [{ url: "https://api.interfaze.ai", description: "Production" }],
+  servers: [{ url: "https://api.rightpeople.ai", description: "Production" }],
   security: [{ bearerAuth: [] }],
 };
 
 export function createApp(options: { apiKey?: string; engine?: Engine } = {}) {
-  const apiKey = options.apiKey ?? process.env.INTERFAZE_API_KEY;
+  const apiKey = options.apiKey ?? process.env.RIGHTPEOPLE_API_KEY;
   const engine = options.engine ?? engineFromEnv();
 
   const app = new OpenAPIHono({
@@ -58,7 +58,7 @@ export function createApp(options: { apiKey?: string; engine?: Engine } = {}) {
   app.route("/v1", embeddings(engine));
 
   app.doc31("/openapi.json", openAPIConfig);
-  app.get("/docs", Scalar({ url: "/openapi.json", pageTitle: "Interfaze API" }));
+  app.get("/docs", Scalar({ url: "/openapi.json", pageTitle: "RightPeople API" }));
   app.get("/health", (c) => c.json({ ok: true }));
 
   app.notFound((c) => apiError(c, 404, `Route ${c.req.method} ${c.req.path} not found`));

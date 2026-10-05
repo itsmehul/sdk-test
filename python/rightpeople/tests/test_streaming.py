@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import httpx
 import pytest
-from interfaze._streaming import iter_events
+from rightpeople._streaming import iter_events
 from pydantic import BaseModel
 
-from interfaze import APIError, ServerSentEvent, Stream
+from rightpeople import APIError, ServerSentEvent, Stream
 
 
 class Item(BaseModel):

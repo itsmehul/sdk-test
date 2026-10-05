@@ -73,7 +73,7 @@ module "nat" {
 
 resource "aws_security_group" "api" {
   name        = "${var.name}-api"
-  description = "Interfaze API Lambda"
+  description = "RightPeople API Lambda"
   vpc_id      = aws_vpc.this.id
 
   egress {

@@ -85,7 +85,7 @@ export interface components {
             data: components["schemas"]["Model"][];
         };
         Model: {
-            /** @example interfaze-beta */
+            /** @example rightpeople-beta */
             id: string;
             /** @enum {string} */
             object: "model";
@@ -153,7 +153,7 @@ export interface components {
             usage?: components["schemas"]["CompletionUsage"] & (Record<string, never> | null);
         };
         ChatCompletionRequest: {
-            /** @example interfaze-beta */
+            /** @example rightpeople-beta */
             model: string;
             messages: components["schemas"]["ChatCompletionMessage"][];
             temperature?: number;
@@ -250,7 +250,7 @@ export interface components {
             };
         };
         EmbeddingRequest: {
-            /** @example interfaze-embed */
+            /** @example rightpeople-embed */
             model: string;
             input: string | string[];
             dimensions?: number;

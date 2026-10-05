@@ -1,15 +1,15 @@
 import asyncio
 
-from interfaze import AsyncInterfaze, Interfaze, RateLimitError
+from rightpeople import AsyncRightPeople, RightPeople, RateLimitError
 
-client = Interfaze()
+client = RightPeople()
 
 models = client.models.list()
 print("Models:", ", ".join(m.id for m in models.data))
 
 try:
     completion = client.chat.completions.create(
-        model="interfaze-beta",
+        model="rightpeople-beta",
         messages=[{"role": "user", "content": "Hello from the Python SDK"}],
         timeout=10,
     )
@@ -19,7 +19,7 @@ except RateLimitError as error:
     raise
 
 with client.chat.completions.create(
-    model="interfaze-beta",
+    model="rightpeople-beta",
     messages=[{"role": "user", "content": "Stream this sentence back to me"}],
     stream=True,
 ) as stream:
@@ -28,14 +28,14 @@ with client.chat.completions.create(
         print(chunk.choices[0].delta.content or "", end="", flush=True)
     print()
 
-embedding = client.embeddings.create(model="interfaze-embed", input="hello")
+embedding = client.embeddings.create(model="rightpeople-embed", input="hello")
 print("Embedding dimensions:", len(embedding.data[0].embedding))
 
 
 async def main() -> None:
-    async with AsyncInterfaze() as async_client:
+    async with AsyncRightPeople() as async_client:
         reply = await async_client.chat.completions.create(
-            model="interfaze-beta", messages=[{"role": "user", "content": "Hello async"}]
+            model="rightpeople-beta", messages=[{"role": "user", "content": "Hello async"}]
         )
         print("Async:", reply.choices[0].message.content)
 

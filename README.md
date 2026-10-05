@@ -1,16 +1,16 @@
-# Interfaze SDK
+# RightPeople SDK
 
-Monorepo for the Interfaze OpenAI-compatible API and its client libraries.
+Monorepo for the RightPeople OpenAI-compatible API and its client libraries.
 
 | Path | What it is |
 | --- | --- |
 | `apps/api` | Hono reference API (`/v1/models`, `/v1/chat/completions`, `/v1/embeddings`). Runs on Node locally and on AWS Lambda in production. |
 | `openapi/openapi.json` | Spec generated from `apps/api`. Source of truth for every SDK. |
-| `packages/sdk` | `@interfaze/sdk` TypeScript client |
-| `packages/ai-sdk-provider` | `@interfaze/ai-sdk-provider` for the Vercel AI SDK |
-| `packages/langchain` | `@interfaze/langchain` |
-| `python/interfaze` | `interfaze` Python client |
-| `python/langchain-interfaze` | `langchain-interfaze` |
+| `packages/sdk` | `@rightpeople/sdk` TypeScript client |
+| `packages/ai-sdk-provider` | `@rightpeople/ai-sdk-provider` for the Vercel AI SDK |
+| `packages/langchain` | `@rightpeople/langchain` |
+| `python/rightpeople` | `rightpeople` Python client |
+| `python/langchain-rightpeople` | `langchain-rightpeople` |
 | `examples` | TypeScript and Python examples that call the API through each package |
 | `infra/terraform` | Production infrastructure: Lambda API and a scale-to-zero spot GPU running vLLM |
 
@@ -44,7 +44,7 @@ ollama pull nomic-embed-text:v1.5
 ollama serve
 ```
 
-**Echo engine (no models):** set `INTERFAZE_ENGINE=echo` in `.env`. Responses are deterministic, which is what the tests use.
+**Echo engine (no models):** set `RIGHTPEOPLE_ENGINE=echo` in `.env`. Responses are deterministic, which is what the tests use.
 
 ### 3. Start the API
 
@@ -79,18 +79,18 @@ A typical first run is Codegen, then Quality → Build, then any example while `
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
-| `INTERFAZE_API_KEY` | Key the local API accepts and the SDKs send. If empty, the API accepts any bearer token. | `sk-local-dev` |
-| `INTERFAZE_BASE_URL` | Where the SDKs and examples send requests | `http://localhost:8787/v1` |
+| `RIGHTPEOPLE_API_KEY` | Key the local API accepts and the SDKs send. If empty, the API accepts any bearer token. | `sk-local-dev` |
+| `RIGHTPEOPLE_BASE_URL` | Where the SDKs and examples send requests | `http://localhost:8787/v1` |
 | `PORT` | Local API port | `8787` |
 | `INFERENCE_BASE_URL` | OpenAI-compatible backend | `http://localhost:11434/v1` |
 | `INFERENCE_API_KEY` | Bearer token for the backend, if it needs one | unset |
-| `CHAT_MODEL` | Backend model behind `interfaze-beta` | `tinyllama` |
-| `EMBED_MODEL` | Backend model behind `interfaze-embed` | `nomic-embed-text:v1.5` |
-| `INTERFAZE_ENGINE` | Set to `echo` to skip the backend | unset |
+| `CHAT_MODEL` | Backend model behind `rightpeople-beta` | `tinyllama` |
+| `EMBED_MODEL` | Backend model behind `rightpeople-embed` | `nomic-embed-text:v1.5` |
+| `RIGHTPEOPLE_ENGINE` | Set to `echo` to skip the backend | unset |
 
 ### Changing the API
 
-The spec and generated SDK types are checked into the repo, and CI fails if they drift. After editing routes or schemas in `apps/api`, run Codegen from `pnpm cli` and commit the updated `openapi/`, `packages/sdk/src/generated/` and `python/interfaze/src/interfaze/_generated/`.
+The spec and generated SDK types are checked into the repo, and CI fails if they drift. After editing routes or schemas in `apps/api`, run Codegen from `pnpm cli` and commit the updated `openapi/`, `packages/sdk/src/generated/` and `python/rightpeople/src/rightpeople/_generated/`.
 
 ## Production
 
@@ -112,7 +112,7 @@ flowchart LR
 1. Create an S3 bucket for Terraform state:
 
    ```sh
-   aws s3 mb s3://interfaze-terraform-state-<account-id> --region us-east-1
+   aws s3 mb s3://rightpeople-terraform-state-<account-id> --region us-east-1
    ```
 
 2. Copy `infra/terraform/envs/prod/backend.hcl.example` to `backend.hcl` in the same folder and fill in the bucket name.
@@ -129,8 +129,8 @@ flowchart LR
 5. Point the SDKs at production:
 
    ```sh
-   export INTERFAZE_BASE_URL=<api_base_url>
-   export INTERFAZE_API_KEY=<api_key>
+   export RIGHTPEOPLE_BASE_URL=<api_base_url>
+   export RIGHTPEOPLE_API_KEY=<api_key>
    ```
 
 To ship API changes later, run **Deploy** again. Use **Destroy** to tear everything down.
@@ -153,8 +153,8 @@ Override these in `infra/terraform/envs/prod` with a `terraform.tfvars` file or 
 
 ### Troubleshooting
 
-- Lambda logs are in the CloudWatch log group `/aws/lambda/interfaze-api`.
-- GPU boot logs are at `/var/log/interfaze-boot.log` on the instance. Connect with SSM Session Manager; no SSH key is configured.
+- Lambda logs are in the CloudWatch log group `/aws/lambda/rightpeople-api`.
+- GPU boot logs are at `/var/log/rightpeople-boot.log` on the instance. Connect with SSM Session Manager; no SSH key is configured.
 - vLLM runs as the systemd units `vllm-chat` and `vllm-embed`.
 
 ## Releasing

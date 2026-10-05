@@ -1,5 +1,5 @@
 output "api_base_url" {
-  description = "Set as INTERFAZE_BASE_URL for the SDKs."
+  description = "Set as RIGHTPEOPLE_BASE_URL for the SDKs."
   value       = "${trimsuffix(module.api.function_url, "/")}/v1"
 }
 

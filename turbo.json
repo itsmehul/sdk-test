@@ -3,9 +3,9 @@
   "ui": "stream",
   "agentGuidance": false,
   "globalPassThroughEnv": [
-    "INTERFAZE_API_KEY",
-    "INTERFAZE_BASE_URL",
-    "INTERFAZE_ENGINE",
+    "RIGHTPEOPLE_API_KEY",
+    "RIGHTPEOPLE_BASE_URL",
+    "RIGHTPEOPLE_ENGINE",
     "PORT",
     "INFERENCE_BASE_URL",
     "INFERENCE_API_KEY",

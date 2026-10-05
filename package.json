@@ -1,5 +1,5 @@
 {
-  "name": "interfaze-sdk",
+  "name": "rightpeople-sdk",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.9.1",

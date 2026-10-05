@@ -1,9 +1,9 @@
 {
-  "name": "@interfaze/langchain",
+  "name": "@rightpeople/langchain",
   "version": "0.1.0",
-  "description": "Interfaze chat models and embeddings for LangChain.js",
+  "description": "RightPeople chat models and embeddings for LangChain.js",
   "keywords": [
-    "interfaze",
+    "rightpeople",
     "langchain",
     "llm",
     "embeddings"
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/interfaze/sdk.git",
+    "url": "git+https://github.com/rightpeople/sdk.git",
     "directory": "packages/langchain"
   },
   "type": "module",
@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@interfaze/api": "workspace:*",
+    "@rightpeople/api": "workspace:*",
     "@langchain/core": "^1.2.14",
     "@types/node": "^26.6.4",
     "publint": "^0.3.25",

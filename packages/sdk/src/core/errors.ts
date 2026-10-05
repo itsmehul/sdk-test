@@ -1,12 +1,12 @@
-export class InterfazeError extends Error {
-  override name = "InterfazeError";
+export class RightPeopleError extends Error {
+  override name = "RightPeopleError";
 }
 
 type ErrorBody = {
   error?: { message?: string; type?: string; code?: string | null; param?: string | null };
 };
 
-export class APIError extends InterfazeError {
+export class APIError extends RightPeopleError {
   override name = "APIError";
   readonly status: number;
   readonly headers: Headers;
@@ -70,7 +70,7 @@ export class InternalServerError extends APIError {
   override name = "InternalServerError";
 }
 
-export class APIConnectionError extends InterfazeError {
+export class APIConnectionError extends RightPeopleError {
   override name = "APIConnectionError";
   constructor(message = "Connection error", options?: { cause?: unknown }) {
     super(message, options);
@@ -84,7 +84,7 @@ export class APIConnectionTimeoutError extends APIConnectionError {
   }
 }
 
-export class APIUserAbortError extends InterfazeError {
+export class APIUserAbortError extends RightPeopleError {
   override name = "APIUserAbortError";
   constructor(message = "Request was aborted") {
     super(message);

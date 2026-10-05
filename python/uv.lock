@@ -10,9 +10,9 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "interfaze",
-    "interfaze-python-workspace",
-    "langchain-interfaze",
+    "rightpeople",
+    "rightpeople-python-workspace",
+    "langchain-rightpeople",
 ]
 
 [[package]]
@@ -449,9 +449,9 @@ wheels = [
 ]
 
 [[package]]
-name = "interfaze"
+name = "rightpeople"
 version = "0.1.0"
-source = { editable = "interfaze" }
+source = { editable = "rightpeople" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
@@ -466,15 +466,15 @@ requires-dist = [
 ]
 
 [[package]]
-name = "interfaze-python-workspace"
+name = "rightpeople-python-workspace"
 version = "0.0.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
     { name = "datamodel-code-generator" },
-    { name = "interfaze" },
-    { name = "langchain-interfaze" },
+    { name = "rightpeople" },
+    { name = "langchain-rightpeople" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -486,8 +486,8 @@ dev = [
 [package.metadata.requires-dev]
 dev = [
     { name = "datamodel-code-generator", specifier = ">=0.83.0" },
-    { name = "interfaze", editable = "interfaze" },
-    { name = "langchain-interfaze", editable = "langchain-interfaze" },
+    { name = "rightpeople", editable = "rightpeople" },
+    { name = "langchain-rightpeople", editable = "langchain-rightpeople" },
     { name = "pyright", specifier = ">=1.1.414" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
@@ -684,9 +684,9 @@ wheels = [
 ]
 
 [[package]]
-name = "langchain-interfaze"
+name = "langchain-rightpeople"
 version = "0.1.0"
-source = { editable = "langchain-interfaze" }
+source = { editable = "langchain-rightpeople" }
 dependencies = [
     { name = "langchain-core" },
     { name = "langchain-openai" },

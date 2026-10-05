@@ -1,5 +1,5 @@
 {
-  "name": "@interfaze/examples",
+  "name": "@rightpeople/examples",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,9 +7,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@interfaze/ai-sdk-provider": "workspace:*",
-    "@interfaze/langchain": "workspace:*",
-    "@interfaze/sdk": "workspace:*",
+    "@rightpeople/ai-sdk-provider": "workspace:*",
+    "@rightpeople/langchain": "workspace:*",
+    "@rightpeople/sdk": "workspace:*",
     "@langchain/core": "^1.2.14",
     "ai": "^7.0.127"
   },

@@ -6,11 +6,11 @@ from typing import Any, cast
 import httpx
 
 
-class InterfazeError(Exception):
+class RightPeopleError(Exception):
     pass
 
 
-class APIError(InterfazeError):
+class APIError(RightPeopleError):
     status_code: int
     response: httpx.Response
     body: Any
@@ -84,7 +84,7 @@ class InternalServerError(APIError):
     pass
 
 
-class APIConnectionError(InterfazeError):
+class APIConnectionError(RightPeopleError):
     def __init__(self, message: str = "Connection error") -> None:
         super().__init__(message)
 
