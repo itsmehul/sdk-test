@@ -35,3 +35,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # changesets v3 no longer prints "New tag:" lines, so changesets/action
+      # never pushes the tags `changeset publish` creates or opens releases.
+      - name: Push tags and create GitHub releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for tag in $(git tag --points-at HEAD); do
+            git push origin "refs/tags/$tag"
+            gh release view "$tag" >/dev/null 2>&1 && continue
+            version="${tag##*@}"
+            changelog="packages/$(basename "${tag%@*}")/CHANGELOG.md"
+            notes=$(awk -v h="## $version" '$0 == h { f = 1; next } /^## / { f = 0 } f' "$changelog" 2>/dev/null)
+            flags=()
+            [[ "$version" == *-* ]] && flags+=(--prerelease)
+            gh release create "$tag" --title "$tag" --notes "${notes:-Release $tag}" "${flags[@]}"
+          done
