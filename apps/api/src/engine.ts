@@ -236,7 +236,7 @@ export function engineFromEnv(env: NodeJS.ProcessEnv = process.env): Engine {
   return openAICompatibleEngine({
     baseURL: env.INFERENCE_BASE_URL ?? "http://localhost:11434/v1",
     apiKey: env.INFERENCE_API_KEY,
-    chatModel: env.CHAT_MODEL ?? "tinyllama",
+    chatModel: env.CHAT_MODEL ?? "qwen2.5:1.5b",
     embedModel: env.EMBED_MODEL ?? "nomic-embed-text:v1.5",
   });
 }

@@ -39,7 +39,7 @@ The API forwards chat and embedding requests to any OpenAI-compatible server set
 **Ollama (real models):**
 
 ```sh
-ollama pull tinyllama
+ollama pull qwen2.5:1.5b
 ollama pull nomic-embed-text:v1.5
 ollama serve
 ```
@@ -84,7 +84,7 @@ A typical first run is Codegen, then Quality → Build, then any example while `
 | `PORT` | Local API port | `8787` |
 | `INFERENCE_BASE_URL` | OpenAI-compatible backend | `http://localhost:11434/v1` |
 | `INFERENCE_API_KEY` | Bearer token for the backend, if it needs one | unset |
-| `CHAT_MODEL` | Backend model behind `rightpeople-beta` | `tinyllama` |
+| `CHAT_MODEL` | Backend model behind `rightpeople-beta` | `qwen2.5:1.5b` |
 | `EMBED_MODEL` | Backend model behind `rightpeople-embed` | `nomic-embed-text:v1.5` |
 | `RIGHTPEOPLE_ENGINE` | Set to `echo` to skip the backend | unset |
 
