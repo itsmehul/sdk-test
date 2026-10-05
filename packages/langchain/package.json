@@ -1,5 +1,5 @@
 {
-  "name": "@rightpeople/langchain",
+  "name": "@itsmehul/langchain",
   "version": "0.1.0",
   "description": "RightPeople chat models and embeddings for LangChain.js",
   "keywords": [
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rightpeople/sdk.git",
+    "url": "git+https://github.com/itsmehul/rightpeople-sdk.git",
     "directory": "packages/langchain"
   },
   "type": "module",

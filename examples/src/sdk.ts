@@ -1,4 +1,4 @@
-import { RightPeople, RateLimitError } from "@rightpeople/sdk";
+import { RateLimitError, RightPeople } from "@itsmehul/sdk";
 
 const client = new RightPeople();
 
@@ -9,7 +9,7 @@ try {
   const completion = await client.chat.completions.create(
     {
       model: "rightpeople-beta",
-      messages: [{ role: "user", content: "Hello from @rightpeople/sdk" }],
+      messages: [{ role: "user", content: "Hello from @itsmehul/sdk" }],
     },
     { signal: AbortSignal.timeout(10_000) },
   );

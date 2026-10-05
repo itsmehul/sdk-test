@@ -6,9 +6,9 @@ Monorepo for the RightPeople OpenAI-compatible API and its client libraries.
 | --- | --- |
 | `apps/api` | Hono reference API (`/v1/models`, `/v1/chat/completions`, `/v1/embeddings`). Runs on Node locally and on AWS Lambda in production. |
 | `openapi/openapi.json` | Spec generated from `apps/api`. Source of truth for every SDK. |
-| `packages/sdk` | `@rightpeople/sdk` TypeScript client |
-| `packages/ai-sdk-provider` | `@rightpeople/ai-sdk-provider` for the Vercel AI SDK |
-| `packages/langchain` | `@rightpeople/langchain` |
+| `packages/sdk` | `@itsmehul/sdk` TypeScript client |
+| `packages/ai-sdk-provider` | `@itsmehul/ai-sdk-provider` for the Vercel AI SDK |
+| `packages/langchain` | `@itsmehul/langchain` |
 | `python/rightpeople` | `rightpeople` Python client |
 | `python/langchain-rightpeople` | `langchain-rightpeople` |
 | `examples` | TypeScript and Python examples that call the API through each package |

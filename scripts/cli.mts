@@ -107,19 +107,19 @@ const tasks = {
     args: ["run", "lint:pkg", "lint:types"],
   },
   exampleSdk: {
-    label: "@rightpeople/sdk",
+    label: "@itsmehul/sdk",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("sdk.ts"),
   },
   exampleAiSdk: {
-    label: "@rightpeople/ai-sdk-provider",
+    label: "@itsmehul/ai-sdk-provider",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("ai-sdk.ts"),
   },
   exampleLangchain: {
-    label: "@rightpeople/langchain",
+    label: "@itsmehul/langchain",
     hint: "Needs `pnpm dev` running and a build",
     command: "tsx",
     args: example("langchain.ts"),

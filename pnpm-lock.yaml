@@ -236,13 +236,13 @@ importers:
 
   examples:
     dependencies:
-      '@rightpeople/ai-sdk-provider':
+      '@itsmehul/ai-sdk-provider':
         specifier: workspace:*
         version: link:../packages/ai-sdk-provider
-      '@rightpeople/langchain':
+      '@itsmehul/langchain':
         specifier: workspace:*
         version: link:../packages/langchain
-      '@rightpeople/sdk':
+      '@itsmehul/sdk':
         specifier: workspace:*
         version: link:../packages/sdk
       '@langchain/core':
@@ -305,12 +305,12 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
         version: 0.18.5
-      '@rightpeople/api':
-        specifier: workspace:*
-        version: link:../../apps/api
       '@langchain/core':
         specifier: ^1.2.14
         version: 1.2.14(openai@7.27.0(@aws-sdk/credential-provider-node@3.972.84)(@smithy/signature-v4@5.7.4)(undici@7.30.0)(zod@4.6.5))
+      '@rightpeople/api':
+        specifier: workspace:*
+        version: link:../../apps/api
       '@types/node':
         specifier: ^26.6.4
         version: 26.6.4

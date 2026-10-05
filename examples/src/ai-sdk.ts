@@ -1,4 +1,4 @@
-import { rightpeople } from "@rightpeople/ai-sdk-provider";
+import { rightpeople } from "@itsmehul/ai-sdk-provider";
 import { embed, generateText, streamText } from "ai";
 
 const { text, usage } = await generateText({

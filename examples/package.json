@@ -7,9 +7,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@rightpeople/ai-sdk-provider": "workspace:*",
-    "@rightpeople/langchain": "workspace:*",
-    "@rightpeople/sdk": "workspace:*",
+    "@itsmehul/ai-sdk-provider": "workspace:*",
+    "@itsmehul/langchain": "workspace:*",
+    "@itsmehul/sdk": "workspace:*",
     "@langchain/core": "^1.2.14",
     "ai": "^7.0.127"
   },

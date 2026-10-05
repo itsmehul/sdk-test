@@ -1,4 +1,4 @@
-import { ChatRightPeople, RightPeopleEmbeddings } from "@rightpeople/langchain";
+import { ChatRightPeople, RightPeopleEmbeddings } from "@itsmehul/langchain";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 const model = new ChatRightPeople({ model: "rightpeople-beta" });

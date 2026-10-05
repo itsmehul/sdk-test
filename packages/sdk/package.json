@@ -1,5 +1,5 @@
 {
-  "name": "@rightpeople/sdk",
+  "name": "@itsmehul/sdk",
   "version": "0.1.0",
   "description": "Official TypeScript SDK for the RightPeople API",
   "keywords": [
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rightpeople/sdk.git",
+    "url": "git+https://github.com/itsmehul/rightpeople-sdk.git",
     "directory": "packages/sdk"
   },
   "type": "module",
