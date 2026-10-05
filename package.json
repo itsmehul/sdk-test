@@ -1,0 +1,24 @@
+{
+  "name": "interfaze-sdk",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "cli": "tsx scripts/cli.mts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@changesets/cli": "^3.0.3",
+    "@clack/prompts": "^1.8.1",
+    "@types/node": "^26.6.4",
+    "execa": "^10.0.1",
+    "picocolors": "^1.1.1",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.7",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@interfaze/python",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "uv run python interfaze/scripts/generate.py",
+    "build": "uv build --all-packages --out-dir dist",
+    "typecheck": "uv run pyright",
+    "test": "uv run pytest"
+  },
+  "devDependencies": {
+    "@interfaze/api": "workspace:*"
+  }
+}

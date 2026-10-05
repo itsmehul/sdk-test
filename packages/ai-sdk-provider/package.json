@@ -1,0 +1,69 @@
+{
+  "name": "@interfaze/ai-sdk-provider",
+  "version": "0.1.0",
+  "description": "Interfaze provider for the Vercel AI SDK",
+  "keywords": [
+    "interfaze",
+    "ai-sdk",
+    "vercel",
+    "provider",
+    "llm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interfaze/sdk.git",
+    "directory": "packages/ai-sdk-provider"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint:pkg": "publint --strict",
+    "lint:types": "attw --pack ."
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.62",
+    "@ai-sdk/provider": "^4.0.21",
+    "@ai-sdk/provider-utils": "^5.0.53"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@interfaze/api": "workspace:*",
+    "@types/node": "^26.6.4",
+    "ai": "^7.0.127",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
