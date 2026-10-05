@@ -4,7 +4,7 @@ import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
-import { UpstreamError } from "./engine";
+import { type Engine, engineFromEnv, UpstreamError } from "./engine";
 import { apiError } from "./errors";
 import { chat } from "./routes/chat";
 import { embeddings } from "./routes/embeddings";
@@ -21,8 +21,9 @@ export const openAPIConfig: Parameters<OpenAPIHono["getOpenAPI31Document"]>[0] =
   security: [{ bearerAuth: [] }],
 };
 
-export function createApp(options: { apiKey?: string } = {}) {
+export function createApp(options: { apiKey?: string; engine?: Engine } = {}) {
   const apiKey = options.apiKey ?? process.env.INTERFAZE_API_KEY;
+  const engine = options.engine ?? engineFromEnv();
 
   const app = new OpenAPIHono({
     defaultHook: (result, c) => {
@@ -53,8 +54,8 @@ export function createApp(options: { apiKey?: string } = {}) {
   );
 
   app.route("/v1", models);
-  app.route("/v1", chat);
-  app.route("/v1", embeddings);
+  app.route("/v1", chat(engine));
+  app.route("/v1", embeddings(engine));
 
   app.doc31("/openapi.json", openAPIConfig);
   app.get("/docs", Scalar({ url: "/openapi.json", pageTitle: "Interfaze API" }));
@@ -64,7 +65,8 @@ export function createApp(options: { apiKey?: string } = {}) {
   app.onError((err, c) => {
     if (err instanceof HTTPException) return err.getResponse();
     if (err instanceof UpstreamError) {
-      return apiError(c, 502, err.message, { code: "upstream_error" });
+      if (err.retryAfter) c.header("retry-after", String(err.retryAfter));
+      return apiError(c, err.status, err.message, { code: err.code });
     }
     console.error(err);
     return apiError(c, 500, "Internal server error");
@@ -78,3 +80,4 @@ function authError(message: string) {
 }
 
 export type App = ReturnType<typeof createApp>;
+export { type Engine, echoEngine, openAICompatibleEngine } from "./engine";

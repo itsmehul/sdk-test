@@ -1,0 +1,6 @@
+# Copy to backend.hcl. Create the bucket once: aws s3 mb s3://<bucket> --region us-east-1
+bucket       = "interfaze-terraform-state-<account-id>"
+key          = "prod/terraform.tfstate"
+region       = "us-east-1"
+encrypt      = true
+use_lockfile = true

@@ -1,9 +1,9 @@
-import { createApp } from "@interfaze/api";
+import { createApp, echoEngine } from "@interfaze/api";
 import { embedMany, generateText, streamText } from "ai";
 import { describe, expect, it } from "vitest";
 import { createInterfaze } from "../src";
 
-const app = createApp({ apiKey: "test-key" });
+const app = createApp({ apiKey: "test-key", engine: echoEngine });
 const interfaze = createInterfaze({
   apiKey: "test-key",
   baseURL: "http://localhost/v1",

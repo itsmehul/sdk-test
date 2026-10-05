@@ -1,0 +1,114 @@
+#!/bin/bash
+set -euo pipefail
+exec > >(tee -a /var/log/interfaze-boot.log) 2>&1
+
+export HOME=/root
+REGION="${region}"
+BUCKET="${bucket}"
+
+if ! command -v aws >/dev/null; then
+  snap install aws-cli --classic
+fi
+
+curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
+uv venv /opt/vllm --python 3.12
+uv pip install --python /opt/vllm/bin/python "vllm==${vllm_version}"
+
+# Weights are cached in S3 after the first boot so later cold starts skip Hugging Face.
+fetch_model() {
+  local repo="$1" dir="$2" prefix="s3://$BUCKET/models/$1"
+  if aws s3 ls "$prefix/config.json" --region "$REGION" >/dev/null 2>&1; then
+    aws s3 sync "$prefix" "$dir" --region "$REGION" --only-show-errors
+  else
+    /opt/vllm/bin/python -c "from huggingface_hub import snapshot_download as d; d('$repo', local_dir='$dir')"
+    aws s3 sync "$dir" "$prefix" --region "$REGION" --only-show-errors --exclude ".cache/*"
+  fi
+}
+fetch_model "${chat_model}" /opt/models/chat
+fetch_model "${embed_model}" /opt/models/embed
+
+KEY=$(aws ssm get-parameter --region "$REGION" --name "${inference_api_key_parameter}" \
+  --with-decryption --query Parameter.Value --output text)
+install -m 600 /dev/null /etc/vllm.env
+echo "VLLM_API_KEY=$KEY" > /etc/vllm.env
+
+# T4 GPUs lack bfloat16, hence --dtype half. Both models share the 16 GB card.
+cat > /etc/systemd/system/vllm-chat.service <<UNIT
+[Unit]
+Description=vLLM chat (${chat_model})
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/vllm.env
+ExecStart=/opt/vllm/bin/vllm serve /opt/models/chat --served-model-name ${chat_model} \
+  --host 0.0.0.0 --port ${chat_port} --dtype half --max-model-len ${chat_max_model_len} \
+  --gpu-memory-utilization 0.70
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat > /etc/systemd/system/vllm-embed.service <<UNIT
+[Unit]
+Description=vLLM embeddings (${embed_model})
+After=vllm-chat.service
+
+[Service]
+EnvironmentFile=/etc/vllm.env
+ExecStartPre=/bin/sh -c 'until curl -sf http://127.0.0.1:${chat_port}/health; do sleep 5; done'
+ExecStart=/opt/vllm/bin/vllm serve /opt/models/embed --served-model-name ${embed_model} \
+  --host 0.0.0.0 --port ${embed_port} --dtype half --trust-remote-code \
+  --gpu-memory-utilization 0.20
+TimeoutStartSec=infinity
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+# Terminates this instance (and drops the group to zero) after ${idle_minutes} minutes without requests.
+cat > /usr/local/bin/interfaze-idle-check <<'SCRIPT'
+#!/bin/bash
+set -euo pipefail
+STATE=/var/lib/interfaze
+mkdir -p "$STATE"
+total=$( { curl -sf http://127.0.0.1:${chat_port}/metrics || true; curl -sf http://127.0.0.1:${embed_port}/metrics || true; } \
+  | awk '/^http_requests_total/ && !/handler="\/metrics"/ {s += $NF} /^vllm:prompt_tokens_total/ {s += $NF} END {printf "%d", s}')
+now=$(date +%s)
+if [ ! -f "$STATE/last" ] || [ "$total" != "$(cat "$STATE/total" 2>/dev/null)" ]; then
+  echo "$total" > "$STATE/total"
+  echo "$now" > "$STATE/last"
+fi
+if (( now - $(cat "$STATE/last") >= ${idle_minutes} * 60 )); then
+  TOKEN=$(curl -sX PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+  ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+  aws autoscaling terminate-instance-in-auto-scaling-group --region "${region}" \
+    --instance-id "$ID" --should-decrement-desired-capacity
+fi
+SCRIPT
+chmod +x /usr/local/bin/interfaze-idle-check
+
+cat > /etc/systemd/system/interfaze-idle.service <<'UNIT'
+[Unit]
+Description=Terminate idle GPU instance
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/interfaze-idle-check
+UNIT
+
+cat > /etc/systemd/system/interfaze-idle.timer <<'UNIT'
+[Unit]
+Description=Check GPU idleness every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now vllm-chat.service vllm-embed.service interfaze-idle.timer

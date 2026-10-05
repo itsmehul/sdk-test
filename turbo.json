@@ -2,7 +2,16 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
   "agentGuidance": false,
-  "globalPassThroughEnv": ["INTERFAZE_API_KEY", "INTERFAZE_BASE_URL", "PORT"],
+  "globalPassThroughEnv": [
+    "INTERFAZE_API_KEY",
+    "INTERFAZE_BASE_URL",
+    "INTERFAZE_ENGINE",
+    "PORT",
+    "INFERENCE_BASE_URL",
+    "INFERENCE_API_KEY",
+    "CHAT_MODEL",
+    "EMBED_MODEL"
+  ],
   "tasks": {
     "generate": {
       "dependsOn": ["^generate"],

@@ -32,7 +32,7 @@ def base_url() -> Iterator[str]:
     process = subprocess.Popen(
         [str(REPO / "node_modules" / ".bin" / "tsx"), "apps/api/src/server.ts"],
         cwd=REPO,
-        env={**os.environ, "PORT": str(port), "INTERFAZE_API_KEY": API_KEY},
+        env={**os.environ, "PORT": str(port), "INTERFAZE_API_KEY": API_KEY, "INTERFAZE_ENGINE": "echo"},
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
     )

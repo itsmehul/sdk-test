@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { streamSSE } from "hono/streaming";
-import { complete, streamComplete } from "../engine";
+import type { Engine } from "../engine";
 import {
   ChatCompletion,
   ChatCompletionChunk,
@@ -45,67 +45,71 @@ const toUsage = (promptTokens: number, completionTokens: number) => ({
   total_tokens: promptTokens + completionTokens,
 });
 
-export const chat = new OpenAPIHono().openapi(createChatCompletion, async (c) => {
-  const body = c.req.valid("json");
-  const id = `chatcmpl-${crypto.randomUUID()}`;
-  const created = Math.floor(Date.now() / 1000);
+export const chat = (engine: Engine) =>
+  new OpenAPIHono().openapi(createChatCompletion, async (c) => {
+    const body = c.req.valid("json");
+    const id = `chatcmpl-${crypto.randomUUID()}`;
+    const created = Math.floor(Date.now() / 1000);
 
-  if (!body.stream) {
-    const result = await complete(body);
-    return c.json(
-      {
-        id,
-        object: "chat.completion" as const,
-        created,
-        model: body.model,
-        choices: [
-          {
-            index: 0,
-            message: { role: "assistant" as const, content: result.content },
-            finish_reason: result.finishReason,
-          },
-        ],
-        usage: toUsage(result.promptTokens, result.completionTokens),
-      },
-      200,
-    );
-  }
+    if (!body.stream) {
+      const result = await engine.complete(body);
+      return c.json(
+        {
+          id,
+          object: "chat.completion" as const,
+          created,
+          model: body.model,
+          choices: [
+            {
+              index: 0,
+              message: { role: "assistant" as const, content: result.content },
+              finish_reason: result.finishReason,
+            },
+          ],
+          usage: toUsage(result.promptTokens, result.completionTokens),
+        },
+        200,
+      );
+    }
 
-  const abort = new AbortController();
-  const deltas = streamComplete(body, abort.signal);
-  // Pull the first delta before opening the stream so Ollama failures surface as JSON errors.
-  const first = await deltas.next();
+    const abort = new AbortController();
+    const deltas = engine.stream(body, abort.signal);
+    // Pull the first delta before opening the stream so backend failures surface as JSON errors.
+    const first = await deltas.next();
 
-  const base = { id, object: "chat.completion.chunk" as const, created, model: body.model };
-  return streamSSE(c, async (stream) => {
-    stream.onAbort(() => abort.abort());
-    const send = (chunk: ChatCompletionChunk) => stream.writeSSE({ data: JSON.stringify(chunk) });
+    const base = { id, object: "chat.completion.chunk" as const, created, model: body.model };
+    return streamSSE(c, async (stream) => {
+      stream.onAbort(() => abort.abort());
+      const send = (chunk: ChatCompletionChunk) => stream.writeSSE({ data: JSON.stringify(chunk) });
 
-    await send({
-      ...base,
-      choices: [{ index: 0, delta: { role: "assistant", content: "" }, finish_reason: null }],
-    });
+      await send({
+        ...base,
+        choices: [{ index: 0, delta: { role: "assistant", content: "" }, finish_reason: null }],
+      });
 
-    let next = first;
-    while (!next.done && !stream.aborted) {
-      const delta = next.value;
-      if (delta.type === "content") {
-        await send({
-          ...base,
-          choices: [{ index: 0, delta: { content: delta.content }, finish_reason: null }],
-        });
-      } else {
-        await send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: delta.finishReason }] });
-        if (body.stream_options?.include_usage) {
+      let next = first;
+      while (!next.done && !stream.aborted) {
+        const delta = next.value;
+        if (delta.type === "content") {
           await send({
             ...base,
-            choices: [],
-            usage: toUsage(delta.promptTokens, delta.completionTokens),
+            choices: [{ index: 0, delta: { content: delta.content }, finish_reason: null }],
           });
+        } else {
+          await send({
+            ...base,
+            choices: [{ index: 0, delta: {}, finish_reason: delta.finishReason }],
+          });
+          if (body.stream_options?.include_usage) {
+            await send({
+              ...base,
+              choices: [],
+              usage: toUsage(delta.promptTokens, delta.completionTokens),
+            });
+          }
         }
+        next = await deltas.next();
       }
-      next = await deltas.next();
-    }
-    if (!stream.aborted) await stream.writeSSE({ data: "[DONE]" });
+      if (!stream.aborted) await stream.writeSSE({ data: "[DONE]" });
+    });
   });
-});

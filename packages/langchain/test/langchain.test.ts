@@ -1,8 +1,8 @@
-import { createApp } from "@interfaze/api";
+import { createApp, echoEngine } from "@interfaze/api";
 import { describe, expect, it } from "vitest";
 import { ChatInterfaze, InterfazeEmbeddings } from "../src";
 
-const app = createApp({ apiKey: "test-key" });
+const app = createApp({ apiKey: "test-key", engine: echoEngine });
 const connection = {
   apiKey: "test-key",
   baseURL: "http://localhost/v1",

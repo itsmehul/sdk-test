@@ -11,3 +11,9 @@ coverage
 __pycache__
 .pytest_cache
 .ruff_cache
+.terraform
+.build
+*.tfstate
+*.tfstate.*
+*.tfvars
+backend.hcl

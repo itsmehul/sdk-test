@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=../../.env src/server.ts",
     "generate": "tsx scripts/export-openapi.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bundle": "tsx scripts/bundle-lambda.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.3",
@@ -19,7 +20,11 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-auto-scaling": "^3.1146.0",
+    "@aws-sdk/client-ec2": "^3.1146.0",
+    "@aws-sdk/client-ssm": "^3.1146.0",
     "@types/node": "^26.6.4",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3"
   }

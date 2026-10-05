@@ -4,10 +4,14 @@ import { cancel, intro, isCancel, log, outro, select, spinner } from "@clack/pro
 import { execa } from "execa";
 import pc from "picocolors";
 
-type Task = { label: string; hint: string; command: string; args: string[] };
+type Step = { command: string; args: string[] };
+type Task = Step & { label: string; hint: string; before?: Step[] };
 
 const example = (file: string): string[] => ["--env-file-if-exists=.env", `examples/src/${file}`];
 const uv = (...args: string[]): string[] => ["run", "--directory", "python", ...args];
+const TF_DIR = "infra/terraform/envs/prod";
+const terraform = (...args: string[]): string[] => [`-chdir=${TF_DIR}`, ...args];
+const bundleLambda: Step = { command: "pnpm", args: ["--filter", "@interfaze/api", "bundle"] };
 const pyExample = (file: string): string[] => [
   "run",
   "--project",
@@ -127,6 +131,44 @@ const tasks = {
     command: "uv",
     args: ["build", "--directory", "python", "--all-packages", "--out-dir", "dist"],
   },
+  bundle: {
+    label: "Bundle Lambda",
+    hint: "apps/api → apps/api/dist/lambda/index.mjs",
+    ...bundleLambda,
+  },
+  tfInit: {
+    label: "Terraform init",
+    hint: `S3 state from ${TF_DIR}/backend.hcl`,
+    command: "terraform",
+    args: terraform("init", "-backend-config=backend.hcl"),
+  },
+  tfPlan: {
+    label: "Plan",
+    hint: "Bundle Lambda, then terraform plan",
+    command: "terraform",
+    args: terraform("plan"),
+    before: [bundleLambda],
+  },
+  tfApply: {
+    label: "Deploy",
+    hint: "Bundle Lambda, then terraform apply",
+    command: "terraform",
+    args: terraform("apply"),
+    before: [bundleLambda],
+  },
+  tfOutput: {
+    label: "Outputs",
+    hint: "API URL, GPU group, model bucket (`terraform output -raw api_key` for the key)",
+    command: "terraform",
+    args: terraform("output"),
+  },
+  tfDestroy: {
+    label: "Destroy",
+    hint: "Tear down all production infrastructure",
+    command: "terraform",
+    args: terraform("destroy"),
+    before: [bundleLambda],
+  },
   changeset: {
     label: "Add changeset",
     hint: "Describe a change for the next release",
@@ -159,18 +201,17 @@ const groups: ReadonlyArray<{ label: string; hint: string; tasks: readonly TaskI
   {
     label: "Examples",
     hint: "Call the local API through each package",
-    tasks: [
-      "exampleSdk",
-      "exampleAiSdk",
-      "exampleLangchain",
-      "exampleSdkPy",
-      "exampleLangchainPy",
-    ],
+    tasks: ["exampleSdk", "exampleAiSdk", "exampleLangchain", "exampleSdkPy", "exampleLangchainPy"],
   },
   {
     label: "Python",
     hint: "uv workspace in python/",
     tasks: ["pySync", "pyTest", "pyTypecheck", "pyLint", "pyFormat", "pyBuild"],
+  },
+  {
+    label: "Deploy",
+    hint: "AWS Lambda + spot GPU via Terraform",
+    tasks: ["bundle", "tfInit", "tfPlan", "tfApply", "tfOutput", "tfDestroy"],
   },
   { label: "Release", hint: "Changesets", tasks: ["changeset", "changesetStatus", "version"] },
 ];
@@ -197,6 +238,11 @@ check(
   "missing (run codegen)",
 );
 check("Python venv", existsSync("python/.venv"), "missing (Python → Install Python deps)");
+check(
+  "Terraform backend",
+  existsSync(`${TF_DIR}/backend.hcl`),
+  "missing (copy backend.hcl.example)",
+);
 
 const groupIndex = await select({
   message: "Group",
@@ -207,7 +253,7 @@ if (isCancel(groupIndex)) {
   process.exit(0);
 }
 
-const taskId = await select<TaskId>({
+const taskId = await select<string>({
   message: "Task",
   options: (groups[groupIndex]?.tasks ?? []).map((id) => ({
     value: id,
@@ -220,13 +266,15 @@ if (isCancel(taskId)) {
   process.exit(0);
 }
 
-const task: Task = tasks[taskId];
+const task: Task = tasks[taskId as TaskId];
 const s = spinner();
 s.start(`Starting ${task.label}`);
 s.stop(task.label);
 
 try {
-  await execa(task.command, task.args, { stdio: "inherit", preferLocal: true });
+  for (const step of [...(task.before ?? []), task]) {
+    await execa(step.command, step.args, { stdio: "inherit", preferLocal: true });
+  }
   outro("Done");
 } catch (error) {
   const code = (error as { exitCode?: number }).exitCode ?? 1;

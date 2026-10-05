@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { embed, toBase64 } from "../engine";
+import { type Engine, toBase64 } from "../engine";
 import { EmbeddingRequest, EmbeddingResponse, ErrorResponse } from "../schemas";
 
 const createEmbedding = createRoute({
@@ -24,21 +24,22 @@ const createEmbedding = createRoute({
   },
 });
 
-export const embeddings = new OpenAPIHono().openapi(createEmbedding, async (c) => {
-  const body = c.req.valid("json");
-  const inputs = typeof body.input === "string" ? [body.input] : body.input;
-  const { embeddings, promptTokens } = await embed(inputs, body.dimensions);
-  return c.json(
-    {
-      object: "list" as const,
-      model: body.model,
-      data: embeddings.map((vector, index) => ({
-        object: "embedding" as const,
-        index,
-        embedding: body.encoding_format === "base64" ? toBase64(vector) : vector,
-      })),
-      usage: { prompt_tokens: promptTokens, total_tokens: promptTokens },
-    },
-    200,
-  );
-});
+export const embeddings = (engine: Engine) =>
+  new OpenAPIHono().openapi(createEmbedding, async (c) => {
+    const body = c.req.valid("json");
+    const inputs = typeof body.input === "string" ? [body.input] : body.input;
+    const { embeddings, promptTokens } = await engine.embed(inputs, body.dimensions);
+    return c.json(
+      {
+        object: "list" as const,
+        model: body.model,
+        data: embeddings.map((vector, index) => ({
+          object: "embedding" as const,
+          index,
+          embedding: body.encoding_format === "base64" ? toBase64(vector) : vector,
+        })),
+        usage: { prompt_tokens: promptTokens, total_tokens: promptTokens },
+      },
+      200,
+    );
+  });
