@@ -1,11 +1,52 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { loadEnvFile } from "node:process";
 import { cancel, intro, isCancel, log, outro, select, spinner } from "@clack/prompts";
 import { execa } from "execa";
 import pc from "picocolors";
 
-type Step = { command: string; args: string[] };
+type Step = { command: string; args: string[] } | { run: () => Promise<void> };
 type Task = Step & { label: string; hint: string; before?: Step[] };
+
+const REGISTRY_HOST = "npm.pkg.github.com";
+const buildPackages: Step = { command: "turbo", args: ["run", "build", "--filter=./packages/*"] };
+
+async function storeRegistryToken() {
+  const { stdout: token } = await execa("gh", ["auth", "token"]);
+  await execa("npm", ["config", "set", `//${REGISTRY_HOST}/:_authToken`, token]);
+}
+
+async function publishPreview() {
+  const stamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+  const manifests = readdirSync("packages")
+    .map((dir) => join("packages", dir, "package.json"))
+    .filter((file) => existsSync(file));
+  const originals = new Map(manifests.map((file) => [file, readFileSync(file, "utf8")]));
+  try {
+    for (const [file, text] of originals) {
+      const { version } = JSON.parse(text) as { version: string };
+      writeFileSync(
+        file,
+        text.replace(`"version": "${version}"`, `"version": "${version}-preview.${stamp}"`),
+      );
+    }
+    await execa(
+      "pnpm",
+      ["-r", "--filter=./packages/*", "publish", "--tag", "preview", "--no-git-checks"],
+      { stdio: "inherit" },
+    );
+  } finally {
+    for (const [file, text] of originals) writeFileSync(file, text);
+  }
+}
+
+function hasRegistryToken(): boolean {
+  const npmrc = join(homedir(), ".npmrc");
+  return (
+    existsSync(npmrc) && readFileSync(npmrc, "utf8").includes(`//${REGISTRY_HOST}/:_authToken`)
+  );
+}
 
 const example = (file: string): string[] => ["--env-file-if-exists=.env", `examples/src/${file}`];
 const uv = (...args: string[]): string[] => ["run", "--directory", "python", ...args];
@@ -187,6 +228,31 @@ const tasks = {
     command: "changeset",
     args: ["version"],
   },
+  registryLogin: {
+    label: "Log in to GitHub Packages",
+    hint: `gh auth with package scopes → ~/.npmrc token for ${REGISTRY_HOST}`,
+    run: storeRegistryToken,
+    before: [
+      {
+        command: "gh",
+        args: [
+          "auth",
+          "login",
+          "--hostname",
+          "github.com",
+          "--web",
+          "--scopes",
+          "write:packages,read:packages",
+        ],
+      },
+    ],
+  },
+  publishPreview: {
+    label: "Publish preview",
+    hint: "Build, then publish x.y.z-preview.<timestamp> under the `preview` tag",
+    run: publishPreview,
+    before: [buildPackages],
+  },
 } as const satisfies Record<string, Task>;
 
 type TaskId = keyof typeof tasks;
@@ -213,7 +279,11 @@ const groups: ReadonlyArray<{ label: string; hint: string; tasks: readonly TaskI
     hint: "AWS Lambda + spot GPU via Terraform",
     tasks: ["bundle", "tfInit", "tfPlan", "tfApply", "tfOutput", "tfDestroy"],
   },
-  { label: "Release", hint: "Changesets", tasks: ["changeset", "changesetStatus", "version"] },
+  {
+    label: "Release",
+    hint: "Changesets and GitHub Packages",
+    tasks: ["changeset", "changesetStatus", "version", "registryLogin", "publishPreview"],
+  },
 ];
 
 function check(label: string, ok: boolean, missing: string) {
@@ -238,6 +308,7 @@ check(
   "missing (run codegen)",
 );
 check("Python venv", existsSync("python/.venv"), "missing (Python → Install Python deps)");
+check("GitHub Packages token", hasRegistryToken(), "missing (Release → Log in to GitHub Packages)");
 check(
   "Terraform backend",
   existsSync(`${TF_DIR}/backend.hcl`),
@@ -273,7 +344,8 @@ s.stop(task.label);
 
 try {
   for (const step of [...(task.before ?? []), task]) {
-    await execa(step.command, step.args, { stdio: "inherit", preferLocal: true });
+    if ("run" in step) await step.run();
+    else await execa(step.command, step.args, { stdio: "inherit", preferLocal: true });
   }
   outro("Done");
 } catch (error) {

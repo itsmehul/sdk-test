@@ -40,8 +40,8 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "scripts": {
     "generate": "openapi-typescript ../../openapi/openapi.json -o src/generated/schema.d.ts",
